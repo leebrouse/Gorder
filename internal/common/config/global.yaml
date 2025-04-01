@@ -1,0 +1,4 @@
+order:
+  service-name: order
+  server-to-run: http
+  http-addr: localhost:8282

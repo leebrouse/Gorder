@@ -2,7 +2,9 @@ module github.com/leebrouse/Gorder/order
 
 go 1.22.8
 
-replace github.com/leebrouse/Gorder/order => ../order
+replace github.com/leebrouse/Gorder/common => ..\common
+
+require github.com/leebrouse/Gorder/common v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
