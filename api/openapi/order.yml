@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: order service  # API 标题
+  description: order service  # API 描述
+  version: 1.0.0  # 版本号
+servers:
+  - url: 'https://{hostname}/api'  # 服务器地址
+    variables:
+      hostname:
+        default: localhost
+paths:
+  # GetOrder API
+  /customer/{customerID}/orders/{ordersID}:
+    get:
+      description: "get order"  # API 描述
+      parameters:
+        - in: path
+          name: customerID
+          schema:
+            type: string
+          required: true  # 必填
+        - in: path
+          name: ordersID
+          schema:
+            type: string
+          required: true  # 必填
+      responses:
+        '200':
+          description: "get order success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        default:
+          description: "error"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # CreateOrder API
+  /customer/{customerID}/orders:
+    post:
+      description: "create order"
+      parameters:
+        - in: path
+          name: customerID
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '200':
+          description: "create order success "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        default:
+          description: "error"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    # 订单对象
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        customerID:
+          type: string
+        status:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'  # 订单包含的商品列表
+        paymentLink:
+          type: string  # 支付链接
+    # 订单中的商品
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        priceID:
+          type: string
+    # 错误返回格式
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+    # 创建订单请求
+    CreateOrderRequest:
+      type: object
+      required:
+        - customerID
+        - items
+      properties:
+        customerID:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemWithQuantity'  # 带数量的商品
+    ItemWithQuantity:
+      type: object
+      properties:
+        id:
+          type: string
+        quantity:
+          type: integer
+          format: int32

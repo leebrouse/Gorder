@@ -9,7 +9,7 @@ func NewViperConfig() error {
 	//	set file name
 	viper.SetConfigName("global")
 	//	set file type
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("yml")
 	//	add file path
 	viper.AddConfigPath("../common/config")
 	//	read env arguments
