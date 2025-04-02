@@ -1,4 +1,14 @@
+# 当特定 gRPC 服务未配置地址时，使用此默认地址
+fallback-grpc-addr: localhost:3030
+#Order Service
 order:
   service-name: order
   server-to-run: http
   http-addr: localhost:8282
+  grpc-addr: localhost:5002
+# Stock Service
+stock:
+  service-name: stock
+  server-to-run: grpc
+  http-addr: localhost:8283
+  grpc-addr: localhost:5003
