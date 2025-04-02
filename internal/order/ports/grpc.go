@@ -1,16 +1,19 @@
 package ports
 
 import (
-	context "context"
+	"context"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
+	"github.com/leebrouse/Gorder/order/app"
 )
 
 type GRPCServer struct {
+	app app.Application
 }
 
-func NewGRPCServer() *GRPCServer {
-	return &GRPCServer{}
+// New GRPCServer factory pattern
+func NewGRPCServer(app app.Application) *GRPCServer {
+	return &GRPCServer{app: app}
 }
 
 func (G GRPCServer) CreateOrder(ctx context.Context, request *orderpb.CreateOrderRequest) (*empty.Empty, error) {

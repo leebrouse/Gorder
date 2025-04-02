@@ -127,7 +127,7 @@ func (x *ItemWithQuantity) GetQuantity() int32 {
 	return 0
 }
 
-//GetOrderRequest struct
+// GetOrderRequest struct
 type GetOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderID       string                 `protobuf:"bytes,1,opt,name=OrderID,proto3" json:"OrderID,omitempty"`
@@ -180,7 +180,7 @@ func (x *GetOrderRequest) GetCustomerID() string {
 	return ""
 }
 
-//GetOrderResponse / UpdateRequest struct
+// GetOrderResponse / UpdateRequest struct
 type Order struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ID            string                 `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
@@ -350,7 +350,7 @@ const file_orderpb_order_proto_rawDesc = "" +
 	"\fOrderService\x12B\n" +
 	"\vCreateOrder\x12\x1b.orderpb.CreateOrderRequest\x1a\x16.google.protobuf.Empty\x124\n" +
 	"\bGetOrder\x12\x18.orderpb.GetOrderRequest\x1a\x0e.orderpb.order\x125\n" +
-	"\vUpdateOrder\x12\x0e.orderpb.order\x1a\x16.google.protobuf.EmptyB>Z<github.com/leebrouse/Gorder/internal/common/genproto/orderpbb\x06proto3"
+	"\vUpdateOrder\x12\x0e.orderpb.order\x1a\x16.google.protobuf.EmptyB5Z3github.com/leebrouse/Gorder/common/genproto/orderpbb\x06proto3"
 
 var (
 	file_orderpb_order_proto_rawDescOnce sync.Once

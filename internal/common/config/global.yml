@@ -6,6 +6,7 @@ order:
   server-to-run: http
   http-addr: localhost:8282
   grpc-addr: localhost:5002
+
 # Stock Service
 stock:
   service-name: stock

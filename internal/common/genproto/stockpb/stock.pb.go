@@ -7,7 +7,7 @@
 package stockpb
 
 import (
-	orderpb "github.com/leebrouse/Gorder/internal/common/genproto/orderpb"
+	orderpb "github.com/leebrouse/Gorder/common/genproto/orderpb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -222,7 +222,7 @@ const file_stockpb_stock_proto_rawDesc = "" +
 	"\x05Items\x18\x02 \x03(\v2\r.orderpb.ItemR\x05Items2\xb1\x01\n" +
 	"\fStockService\x12?\n" +
 	"\bGetItems\x12\x18.stockpb.GetItemsRequest\x1a\x19.stockpb.GetItemsResponse\x12`\n" +
-	"\x13CheckIfItemsInStock\x12#.stockpb.CheckIfItemsInStockRequest\x1a$.stockpb.CheckIfItemsInStockResponseB>Z<github.com/leebrouse/Gorder/internal/common/genproto/stockpbb\x06proto3"
+	"\x13CheckIfItemsInStock\x12#.stockpb.CheckIfItemsInStockRequest\x1a$.stockpb.CheckIfItemsInStockResponseB5Z3github.com/leebrouse/Gorder/common/genproto/stockpbb\x06proto3"
 
 var (
 	file_stockpb_stock_proto_rawDescOnce sync.Once

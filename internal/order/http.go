@@ -1,8 +1,12 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/leebrouse/Gorder/order/app"
+)
 
 type HTTPServer struct {
+	app app.Application
 }
 
 // (POST /customer/{customerID}/orders)
