@@ -58,7 +58,7 @@ func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*
 func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
 	//TODO implement me
 	m.lock.RLock()
-	defer m.lock.Unlock()
+	defer m.lock.RUnlock()
 
 	for _, o := range m.store {
 		if o.ID == id && o.CustomerID == customerID {
