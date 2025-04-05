@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"net/http"
 )
 
 func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
@@ -20,9 +19,9 @@ func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 	apiRouter.Group("/api")
 
 	//Test router
-	apiRouter.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "pong")
-	})
+	//apiRouter.GET("/ping", func(c *gin.Context) {
+	//	c.JSON(http.StatusOK, "pong")
+	//})
 
 	//run gin server
 	if err := apiRouter.Run(addr); err != nil {

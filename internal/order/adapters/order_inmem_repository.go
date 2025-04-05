@@ -16,12 +16,24 @@ type MemoryOrderRepository struct {
 
 // New a Order Repository for CRUD Operation
 func NewMemoryOrderRepository() *MemoryOrderRepository {
+	//Test data
+	s := make([]*domain.Order, 0)
+	s = append(s, &domain.Order{
+		ID:          "fake-ID",
+		CustomerID:  "fake-customer-id",
+		Status:      "fake-status",
+		PaymentLink: "fake-payment-link",
+		Items:       nil,
+	})
+
 	return &MemoryOrderRepository{
-		lock:  &sync.RWMutex{},
-		store: make([]*domain.Order, 0),
+		lock: &sync.RWMutex{},
+		//store: make([]*domain.Order, 0),
+		store: s,
 	}
 }
 
+// Impelment Repository interface
 func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
 	//TODO implement me
 	m.lock.Lock()

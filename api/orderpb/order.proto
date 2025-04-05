@@ -37,7 +37,6 @@ message order{
   string Status=3;
   repeated Item Items=4;
 }
-
 message Item{
   string  ID=1;
   string Name=2;

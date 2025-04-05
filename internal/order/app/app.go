@@ -1,5 +1,7 @@
 package app
 
+import "github.com/leebrouse/Gorder/order/app/query"
+
 // Application
 type Application struct {
 	//	commend
@@ -14,4 +16,5 @@ type Commend struct {
 
 // Queries
 type Queries struct {
+	GetCustomOrder query.GetCustomerOrderHandler
 }
