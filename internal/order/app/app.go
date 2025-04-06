@@ -1,6 +1,9 @@
 package app
 
-import "github.com/leebrouse/Gorder/order/app/query"
+import (
+	"github.com/leebrouse/Gorder/order/app/command"
+	"github.com/leebrouse/Gorder/order/app/query"
+)
 
 // Application
 type Application struct {
@@ -12,6 +15,8 @@ type Application struct {
 
 // Commend
 type Commend struct {
+	CreateOrder command.CreateOrderHandler
+	UpdateOrder command.UpdateOrderHandler
 }
 
 // Queries

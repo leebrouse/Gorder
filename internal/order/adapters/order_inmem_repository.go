@@ -34,7 +34,7 @@ func NewMemoryOrderRepository() *MemoryOrderRepository {
 }
 
 // Impelment Repository interface
-func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
 	//TODO implement me
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -55,7 +55,7 @@ func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*
 	return newOrder, nil
 }
 
-func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
 	//TODO implement me
 	m.lock.RLock()
 	defer m.lock.RUnlock()
@@ -70,7 +70,7 @@ func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*d
 	return nil, domain.NotFoundError{OrderID: id}
 }
 
-func (m MemoryOrderRepository) Update(ctx context.Context, order *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
+func (m *MemoryOrderRepository) Update(ctx context.Context, order *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
 	//TODO implement me
 	//add lock and unlock
 	m.lock.Lock()
