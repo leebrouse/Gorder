@@ -11,6 +11,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.20.1
+	golang.org/x/net v0.33.0
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1
 )
@@ -48,7 +49,6 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect

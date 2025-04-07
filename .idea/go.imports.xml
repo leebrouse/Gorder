@@ -4,6 +4,7 @@
     <option name="excludedPackages">
       <array>
         <option value="context" />
+        <option value="log" />
       </array>
     </option>
   </component>

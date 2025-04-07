@@ -6,6 +6,7 @@ import (
 	"github.com/leebrouse/Gorder/common/server"
 	"github.com/leebrouse/Gorder/stock/ports"
 	"github.com/leebrouse/Gorder/stock/service"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -24,15 +25,16 @@ func main() {
 	serviceName := viper.GetString("stock.service-name")
 	//serviceType
 	serviceType := viper.GetString("stock.server-to-run")
+	//log
+	logrus.Info(serviceType)
+	//create application
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	application := service.NewApplication(ctx)
 
 	switch serviceType {
 	//1.grpc
 	case "grpc":
-		//create application
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		application := service.NewApplication(ctx)
-
 		//Run grpc server
 		server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 			svc := ports.NewGRPCServer(application)
