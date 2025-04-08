@@ -1,5 +1,7 @@
 package app
 
+import "github.com/leebrouse/Gorder/stock/app/query"
+
 // Application
 type Application struct {
 	//	commend
@@ -9,9 +11,10 @@ type Application struct {
 }
 
 // Commend
-type Commend struct {
-}
+type Commend struct{}
 
 // Queries
 type Queries struct {
+	CheckIfItemsInStock query.CheckIfItemsInStockHandler
+	GetItems            query.GetItemsHandler
 }

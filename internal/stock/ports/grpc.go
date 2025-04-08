@@ -2,10 +2,8 @@ package ports
 
 import (
 	context "context"
-	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/leebrouse/Gorder/stock/app"
-	"github.com/sirupsen/logrus"
 )
 
 type GRPCServer struct {
@@ -17,25 +15,18 @@ func NewGRPCServer(app app.Application) *GRPCServer {
 	return &GRPCServer{app: app}
 }
 
-func (s GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsRequest) (*stockpb.GetItemsResponse, error) {
-	logrus.Info("rpc_request_in, stock_GetItems")
-	defer func() {
-		logrus.Info("rpc_request_out, stock_GetItems")
-	}()
-
-	//Test date
-	fake := []*orderpb.Item{
-		{
-			ID: "fake-item-from-GetItems",
-		},
+func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsRequest) (*stockpb.GetItemsResponse, error) {
+	items, err := G.app.Queries.GetItems.Handle(ctx, request.ItemIDs)
+	if err != nil {
+		return nil, err
 	}
-	return &stockpb.GetItemsResponse{Items: fake}, nil
+	return &stockpb.GetItemsResponse{Items: items}, nil
 }
 
-func (s GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
-	logrus.Info("rpc_request_in, stock_CheckIfItemsInStock")
-	defer func() {
-		logrus.Info("rpc_request_out, stock_CheckIfItemsInStock")
-	}()
-	return nil, nil
+func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
+	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, request.Items)
+	if err != nil {
+		return nil, err
+	}
+	return &stockpb.CheckIfItemsInStockResponse{InStock: 1, Items: items}, nil
 }
