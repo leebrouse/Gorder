@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/leebrouse/Gorder/common/config"
+	"github.com/leebrouse/Gorder/common/discovery"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/leebrouse/Gorder/common/server"
 	"github.com/leebrouse/Gorder/stock/ports"
@@ -31,6 +32,14 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	application := service.NewApplication(ctx)
+
+	deregisterFunc, err := discovery.RegisterToConsul(ctx, serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer func() {
+		_ = deregisterFunc()
+	}()
 
 	switch serviceType {
 	//1.grpc
