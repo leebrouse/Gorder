@@ -24,8 +24,8 @@ func init() {
 }
 
 func main() {
-	//Test viper
-	//log.Printf("%v", viper.Get("order"))
+
+	//logrus.Fatal(viper.GetString("STRIPE_KEY"))
 	serviceName := viper.GetString("order.service-name")
 
 	//create an application with context

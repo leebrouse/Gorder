@@ -1,6 +1,9 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"strings"
+)
 
 /** For reading or setting config for the struct in the Project **/
 
@@ -12,6 +15,9 @@ func NewViperConfig() error {
 	viper.SetConfigType("yml")
 	//	add file path
 	viper.AddConfigPath("../common/config")
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	//_ = viper.BindEnv("stripe-key", "STRIPE_KEY")
 	//	read env arguments
 	viper.AutomaticEnv()
 	//	return read content in the config file
