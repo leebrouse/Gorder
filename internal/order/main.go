@@ -31,7 +31,7 @@ func main() {
 	defer cancel()
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
-	//Run gRPC Server in go routine
+	//Run gRPC Server in goroutine
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 		svc := ports.NewGRPCServer(application)
 		orderpb.RegisterOrderServiceServer(server, svc)

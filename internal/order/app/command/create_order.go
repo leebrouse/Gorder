@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"github.com/leebrouse/Gorder/common/decorator"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/order/app/query"
@@ -32,38 +33,65 @@ type createOrderHandler struct {
 // Handle 实现了命令处理的核心逻辑
 func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*CreateOrderResult, error) {
 	// TODO: 实际应该通过gRPC调用库存服务验证商品可用性
-	//Test CheckIfItemsInStock function
-	logrus.Info("Test CheckIfItemsInStock")
-	err := c.stockGRPC.CheckIfItemsInStock(ctx, cmd.Items)
-	//log
-	logrus.Info("createOrderHandler||err from stockGRPC", err)
-
-	//Test GetItems function
-	logrus.Info("Test CheckIfItemsInStock")
-	resp, _ := c.stockGRPC.GetItems(ctx, []string{"123"})
-	//log
-	logrus.Info("GetItems||resp from stockGRPC", resp)
-
-	// 当前使用测试数据模拟库存响应
-	var stockResponse []*orderpb.Item
-	for _, item := range cmd.Items {
-		stockResponse = append(stockResponse, &orderpb.Item{
-			ID:       item.ID,       // 商品ID
-			Quantity: item.Quantity, // 商品数量
-		})
+	validItems, err := c.validate(ctx, cmd.Items)
+	if err != nil {
+		return nil, err
 	}
 
-	// 调用仓储创建订单
-	createOrder, err := c.orderRepo.Create(ctx, &domain.Order{
-		CustomerID: cmd.CustomerID, // 设置客户ID
-		Items:      stockResponse,  // 设置订单项
+	//创建order
+	o, err := c.orderRepo.Create(ctx, &domain.Order{
+		CustomerID: cmd.CustomerID,
+		Items:      validItems,
 	})
 	if err != nil {
-		return nil, err // 创建失败时返回错误
+		return nil, err
+	}
+	return &CreateOrderResult{OrderID: o.ID}, nil
+}
+
+// validate
+func (c createOrderHandler) validate(ctx context.Context, items []*orderpb.ItemWithQuantity) ([]*orderpb.Item, error) {
+	if len(items) == 0 {
+		return nil, errors.New(" must have at least one item")
+	}
+	items = packItems(items)
+	resp, err := c.stockGRPC.CheckIfItemsInStock(ctx, items)
+	if err != nil {
+		return nil, err
 	}
 
-	// 返回创建成功的订单ID
-	return &CreateOrderResult{OrderID: createOrder.ID}, nil
+	return resp.Items, nil
+}
+
+//合并相同id的order中的quantity 值如
+/**
+	{
+		"id"=2
+		"quantity"=30
+	}
+	{
+		"id"=3
+		"quantity"=30
+	}
+	{
+		"id"=2
+		"quantity"=20
+	}
+**/
+func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
+	//用 map 来进行去重合并
+	merged := make(map[string]int32)
+	for _, item := range items {
+		merged[item.ID] += item.Quantity
+	}
+
+	//合并order 之后的结果
+	var res []*orderpb.ItemWithQuantity
+	for id, quantity := range merged {
+		res = append(res, &orderpb.ItemWithQuantity{ID: id, Quantity: quantity})
+	}
+	return res
+
 }
 
 // NewCreateOrderHandler 创建经过装饰的命令处理器

@@ -51,7 +51,7 @@ func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (
 	logrus.WithFields(logrus.Fields{
 		"input_order":        order,   // 记录当前传入的订单对象
 		"store_after_create": m.store, // 记录订单存储后的状态
-	}).Debug("memory_order_repo_create") // 日志消息，标识日志来源
+	}).Info("memory_order_repo_create") // 日志消息，标识日志来源
 	return newOrder, nil
 }
 

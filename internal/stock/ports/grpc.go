@@ -4,6 +4,7 @@ import (
 	context "context"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/leebrouse/Gorder/stock/app"
+	"github.com/leebrouse/Gorder/stock/app/query"
 )
 
 type GRPCServer struct {
@@ -16,7 +17,7 @@ func NewGRPCServer(app app.Application) *GRPCServer {
 }
 
 func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsRequest) (*stockpb.GetItemsResponse, error) {
-	items, err := G.app.Queries.GetItems.Handle(ctx, request.ItemIDs)
+	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: request.ItemIDs})
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +25,7 @@ func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsReque
 }
 
 func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
-	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, request.Items)
+	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: request.Items})
 	if err != nil {
 		return nil, err
 	}

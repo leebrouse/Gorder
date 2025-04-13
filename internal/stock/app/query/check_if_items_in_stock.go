@@ -20,7 +20,14 @@ type checkIfItemsInStockHandler struct {
 }
 
 func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*orderpb.Item, error) {
-	return nil, nil
+	var res []*orderpb.Item
+	for _, i := range query.Items {
+		res = append(res, &orderpb.Item{
+			ID:       i.ID,
+			Quantity: i.Quantity,
+		})
+	}
+	return res, nil
 }
 
 func NewCheckIfItemsInStockHandler(
