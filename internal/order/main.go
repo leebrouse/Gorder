@@ -33,6 +33,7 @@ func main() {
 	//create an application with context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
 

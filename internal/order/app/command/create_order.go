@@ -1,11 +1,14 @@
 package command
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/decorator"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/order/app/query"
 	domain "github.com/leebrouse/Gorder/order/domain/order"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
@@ -28,6 +31,7 @@ type CreateOrderHandler decorator.CommandHandler[CreateOrder, *CreateOrderResult
 type createOrderHandler struct {
 	orderRepo domain.Repository  // 订单领域仓储接口
 	stockGRPC query.StockService //添加库存服务gRPC客户端
+	channel   *amqp.Channel
 }
 
 // Handle 实现了命令处理的核心逻辑
@@ -46,6 +50,36 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 	if err != nil {
 		return nil, err
 	}
+
+	//OrderCreated queue declare
+	q, err := c.channel.QueueDeclare(
+		broker.EventOrderCreated,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// marshal the order
+	marshalledOrder, err := json.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+
+	//send message
+	err = c.channel.PublishWithContext(ctx, "", q.Name, false, false, amqp.Publishing{
+		ContentType:  "application/json",
+		DeliveryMode: amqp.Persistent, //持久化消息
+		Body:         marshalledOrder,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &CreateOrderResult{OrderID: o.ID}, nil
 }
 
@@ -104,6 +138,7 @@ func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
 func NewCreateOrderHandler(
 	orderRepo domain.Repository,
 	stockGRPC query.StockService,
+	channel *amqp.Channel,
 	logger *logrus.Entry,
 	metricClient decorator.MetricsClient,
 ) CreateOrderHandler {
@@ -111,9 +146,21 @@ func NewCreateOrderHandler(
 	if orderRepo == nil {
 		panic("nil orderRepo") // 启动时快速失败
 	}
+
+	if stockGRPC == nil {
+		panic("nil stockGRPC")
+	}
+
+	if channel == nil {
+		panic("nil channel")
+	}
 	// 应用装饰器链（通常包含日志记录、性能监控、重试等）
 	return decorator.ApplyCommandDecorators[CreateOrder, *CreateOrderResult](
-		createOrderHandler{orderRepo: orderRepo, stockGRPC: stockGRPC}, // 核心处理器 1.order 2.stock
+		createOrderHandler{
+			orderRepo: orderRepo,
+			stockGRPC: stockGRPC,
+			channel:   channel,
+		}, // 核心处理器 1.order 2.stock
 		logger,       // 日志装饰器
 		metricClient, // 监控装饰器
 		// 可以添加更多装饰器...

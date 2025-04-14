@@ -1,5 +1,9 @@
 # 当特定 gRPC 服务未配置地址时，使用此默认地址
 fallback-grpc-addr: localhost:3030
+
+consul:
+  addr: localhost:8500
+
 #Order Service
 order:
   service-name: order
@@ -21,6 +25,12 @@ payment:
   server-to-run: http
   http-addr: localhost:8285 #original port on 8283
   grpc-addr: localhost:5004
+
+rabbitmq:
+  user: guest
+  password: guest
+  host: localhost
+  port: 5672
 
 #get the value from the environment valuable
 stripe-key: "${STRIPE_KEY}"
