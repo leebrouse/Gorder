@@ -91,7 +91,6 @@ func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
 		res = append(res, &orderpb.ItemWithQuantity{ID: id, Quantity: quantity})
 	}
 	return res
-
 }
 
 // NewCreateOrderHandler 创建经过装饰的命令处理器

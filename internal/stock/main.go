@@ -4,6 +4,7 @@ import (
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/discovery"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
+	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
 	"github.com/leebrouse/Gorder/stock/ports"
 	"github.com/leebrouse/Gorder/stock/service"
@@ -16,6 +17,7 @@ import (
 
 // Viper init
 func init() {
+	logging.Init()
 	if err := config.NewViperConfig(); err != nil {
 		log.Fatal(err)
 	}

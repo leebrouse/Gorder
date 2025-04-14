@@ -5,6 +5,7 @@ import (
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/discovery"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
+	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
 	"github.com/leebrouse/Gorder/order/ports"
 	"github.com/leebrouse/Gorder/order/service"
@@ -17,6 +18,7 @@ import (
 
 // init order
 func init() {
+	logging.Init()
 	if err := config.NewViperConfig(); err != nil {
 		log.Fatal(err)
 	}
