@@ -15,4 +15,12 @@ stock:
   http-addr: localhost:8284 #original port on 8283
   grpc-addr: localhost:5003
 
+# 为stripe做回调（webhook）
+payment:
+  service-name: payment
+  server-to-run: http
+  http-addr: localhost:8285 #original port on 8283
+  grpc-addr: localhost:5004
+
+#get the value from the environment valuable
 stripe-key: "${STRIPE_KEY}"

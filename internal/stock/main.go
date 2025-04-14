@@ -35,6 +35,7 @@ func main() {
 	defer cancel()
 	application := service.NewApplication(ctx)
 
+	//register service
 	deregisterFunc, err := discovery.RegisterToConsul(ctx, serviceName)
 	if err != nil {
 		logrus.Fatal(err)
@@ -43,6 +44,7 @@ func main() {
 		_ = deregisterFunc()
 	}()
 
+	// choose the service type
 	switch serviceType {
 	//1.grpc
 	case "grpc":
