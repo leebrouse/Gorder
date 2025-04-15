@@ -36,6 +36,7 @@ message order{
   string CustomerID=2;
   string Status=3;
   repeated Item Items=4;
+  string  PaymentLink=5;
 }
 message Item{
   string  ID=1;

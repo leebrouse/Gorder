@@ -187,6 +187,7 @@ type Order struct {
 	CustomerID    string                 `protobuf:"bytes,2,opt,name=CustomerID,proto3" json:"CustomerID,omitempty"`
 	Status        string                 `protobuf:"bytes,3,opt,name=Status,proto3" json:"Status,omitempty"`
 	Items         []*Item                `protobuf:"bytes,4,rep,name=Items,proto3" json:"Items,omitempty"`
+	PaymentLink   string                 `protobuf:"bytes,5,opt,name=PaymentLink,proto3" json:"PaymentLink,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -247,6 +248,13 @@ func (x *Order) GetItems() []*Item {
 		return x.Items
 	}
 	return nil
+}
+
+func (x *Order) GetPaymentLink() string {
+	if x != nil {
+		return x.PaymentLink
+	}
+	return ""
 }
 
 type Item struct {
@@ -334,14 +342,15 @@ const file_orderpb_order_proto_rawDesc = "" +
 	"\aOrderID\x18\x01 \x01(\tR\aOrderID\x12\x1e\n" +
 	"\n" +
 	"CustomerID\x18\x02 \x01(\tR\n" +
-	"CustomerID\"t\n" +
+	"CustomerID\"\x96\x01\n" +
 	"\x05order\x12\x0e\n" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x1e\n" +
 	"\n" +
 	"CustomerID\x18\x02 \x01(\tR\n" +
 	"CustomerID\x12\x16\n" +
 	"\x06Status\x18\x03 \x01(\tR\x06Status\x12#\n" +
-	"\x05Items\x18\x04 \x03(\v2\r.orderpb.ItemR\x05Items\"`\n" +
+	"\x05Items\x18\x04 \x03(\v2\r.orderpb.ItemR\x05Items\x12 \n" +
+	"\vPaymentLink\x18\x05 \x01(\tR\vPaymentLink\"`\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x12\n" +
 	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\x1a\n" +
