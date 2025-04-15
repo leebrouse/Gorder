@@ -36,7 +36,7 @@ func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 	return ch, conn.Close
 }
 
-/** exchange 声明,direct:点对点  fanout:广播消息 **/
+/** Exchange Declare,direct:点对点  fanout:广播消息 **/
 // Event:  OrderCreated
 func orderCreatedExchangeDeclare(ch *amqp.Channel) error {
 	err := ch.ExchangeDeclare(

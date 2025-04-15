@@ -6,6 +6,7 @@ import (
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
+	"github.com/leebrouse/Gorder/payment/infrastructure/consumer"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -32,6 +33,8 @@ func main() {
 		_ = ch.Close()
 		_ = closeCh()
 	}()
+	//listen the rabbitmq for consuming the message in goroutines
+	go consumer.NewConsumer().Listen(ch)
 
 	//no register the payment service
 	paymentHandler := NewPaymentHandler()
