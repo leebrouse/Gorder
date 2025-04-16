@@ -56,7 +56,6 @@ func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (
 }
 
 func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
-	//TODO implement me
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
@@ -71,7 +70,6 @@ func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*
 }
 
 func (m *MemoryOrderRepository) Update(ctx context.Context, order *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
-	//TODO implement me
 	//add lock and unlock
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -83,7 +81,7 @@ func (m *MemoryOrderRepository) Update(ctx context.Context, order *domain.Order,
 		if o.ID == order.ID && o.CustomerID == order.CustomerID {
 			found = true //find order
 			//	update the order
-			updateOrder, err := updateFn(ctx, o)
+			updateOrder, err := updateFn(ctx, order)
 			if err != nil {
 				return err
 			}

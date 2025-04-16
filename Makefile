@@ -10,3 +10,8 @@ genproto:
 .PHONY: genopenapi
 genopenapi:
 	@./scripts/genopenapi.sh
+
+
+.PHONY: run air_stock air_order air_payment
+
+

@@ -48,6 +48,7 @@ func (G GRPCServer) GetOrder(ctx context.Context, request *orderpb.GetOrderReque
 
 func (G GRPCServer) UpdateOrder(ctx context.Context, request *orderpb.Order) (*emptypb.Empty, error) {
 	logrus.Infof("order_grpc||request_in||request=%+v", request)
+	//create a new order for updating the order status and paymentLink
 	order, err := domain.NewOrder(
 		request.ID,
 		request.CustomerID,

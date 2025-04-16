@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/discovery"
+	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -45,8 +46,35 @@ func NewStockGRPCClient(ctx context.Context) (client stockpb.StockServiceClient,
 		}, err
 	}
 	return stockpb.NewStockServiceClient(conn), conn.Close, nil
+}
 
-	//grpc.DialOption()
+// New stock GRPC client
+func NewOrderGRPCClient(ctx context.Context) (client orderpb.OrderServiceClient, close func() error, err error) {
+	//	read from the config file
+	grpcAddr, err := discovery.GetServiceAddr(ctx, viper.GetString("order.service-name"))
+	if err != nil {
+		return nil, func() error {
+			return nil
+		}, err
+	}
+	if grpcAddr == "" {
+		logrus.Warn("empty grpc addr for order grpc")
+	}
+
+	opts, err := grpcDialOpts(grpcAddr)
+	if err != nil {
+		return nil, func() error {
+			return nil
+		}, err
+	}
+	conn, err := grpc.NewClient(grpcAddr, opts...)
+	if err != nil {
+		return nil, func() error {
+			return nil
+		}, err
+	}
+	return orderpb.NewOrderServiceClient(conn), conn.Close, nil
+
 }
 
 func grpcDialOpts(addr string) ([]grpc.DialOption, error) {
