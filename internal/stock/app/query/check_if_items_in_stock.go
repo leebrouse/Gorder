@@ -19,12 +19,24 @@ type checkIfItemsInStockHandler struct {
 	stockRepo domain.Repository // 订单领域仓储接口
 }
 
+// TODO: delete
+var stub = map[string]string{
+	"1": "price_1REQNE2N8iX2a3y7p9hc9zsb", //fried
+	"2": "price_1RFX6L2N8iX2a3y7wpUCDJOn", //coke
+}
+
 func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*orderpb.Item, error) {
 	var res []*orderpb.Item
 	for _, i := range query.Items {
+		priceId, ok := stub[i.ID]
+		//默认
+		if !ok {
+			priceId = stub["1"]
+		}
 		res = append(res, &orderpb.Item{
 			ID:       i.ID,
 			Quantity: i.Quantity,
+			PriceID:  priceId,
 		})
 	}
 	return res, nil

@@ -22,14 +22,14 @@ func NewStripeProcessor(apiKey string) *StripeProcessor {
 
 // direct url when consume success
 var (
-	successURL = "http://localhost:8282/success"
+	successURL = "http://localhost:8283/success"
 )
 
 func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.Order) (string, error) {
 	var items []*stripe.CheckoutSessionLineItemParams
 	for _, item := range order.Items {
 		items = append(items, &stripe.CheckoutSessionLineItemParams{
-			Price:    stripe.String("price_1REQNE2N8iX2a3y7p9hc9zsb"),
+			Price:    stripe.String(item.PriceID),
 			Quantity: stripe.Int64(int64(item.Quantity)),
 		})
 	}
