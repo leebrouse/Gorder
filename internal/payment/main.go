@@ -45,7 +45,7 @@ func main() {
 	go consumer.NewConsumer(application).Listen(ch)
 
 	//no register the payment service
-	paymentHandler := NewPaymentHandler()
+	paymentHandler := NewPaymentHandler(ch)
 	switch serverType {
 	case "http":
 		server.RunHTTPServer(viper.GetString("payment.service-name"), paymentHandler.RegisterRoutes)

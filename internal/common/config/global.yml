@@ -34,3 +34,4 @@ rabbitmq:
 
 #get the value from the environment valuable
 stripe-key: "${STRIPE_KEY}"
+endpoint-stripe-secret: "${ENDPOINT_STRIPE_SECRET}"

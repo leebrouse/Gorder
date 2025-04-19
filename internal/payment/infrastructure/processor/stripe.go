@@ -36,10 +36,11 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 
 	marshalledItems, _ := json.Marshal(order.Items)
 	metadata := map[string]string{
-		"orderID":    order.ID,
-		"customerID": order.CustomerID,
-		"status":     order.Status,
-		"items":      string(marshalledItems),
+		"orderID":     order.ID,
+		"customerID":  order.CustomerID,
+		"status":      order.Status,
+		"items":       string(marshalledItems),
+		"paymentLink": order.PaymentLink,
 	}
 	params := &stripe.CheckoutSessionParams{
 		Metadata:   metadata,
