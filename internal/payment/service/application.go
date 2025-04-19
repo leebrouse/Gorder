@@ -21,7 +21,8 @@ func NewApplication(ctx context.Context) (app.Application, func()) {
 	}
 	orderGRPC := adapters.NewOrderGRPC(orderClient)
 	//introduce the stripe api
-	stripeProcess := processor.NewStripeProcessor(viper.GetString("stripe_key"))
+	stripeProcess := processor.NewStripeProcessor(viper.GetString("STRIPE_KEY"))
+	//logrus.Infof("stripeProcess=%v", stripeProcess)
 	return newApplication(ctx, orderGRPC, stripeProcess), func() {
 		_ = closeOrderClient()
 	}

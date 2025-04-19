@@ -2,6 +2,7 @@ package processor
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/checkout/session"
@@ -21,7 +22,7 @@ func NewStripeProcessor(apiKey string) *StripeProcessor {
 }
 
 // direct url when consume success
-var (
+const (
 	successURL = "http://localhost:8283/success"
 )
 
@@ -46,7 +47,7 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 		Metadata:   metadata,
 		LineItems:  items,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(successURL),
+		SuccessURL: stripe.String(fmt.Sprintf("%s?customerID=%s&orderID=%s", successURL, order.CustomerID, order.ID)),
 	}
 	result, err := session.New(params)
 	if err != nil {

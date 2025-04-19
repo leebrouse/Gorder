@@ -20,6 +20,7 @@ func NewViperConfig() error {
 	//_ = viper.BindEnv("stripe-key", "STRIPE_KEY")
 	//	read env arguments
 	viper.AutomaticEnv()
+	_ = viper.BindEnv("stripe-key", "STRIPE_KEY", "endpoint-stripe-secret", "ENDPOINT_STRIPE_SECRET")
 	//	return read content in the config file
 	return viper.ReadInConfig()
 }

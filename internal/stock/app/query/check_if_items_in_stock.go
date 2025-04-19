@@ -21,8 +21,8 @@ type checkIfItemsInStockHandler struct {
 
 // TODO: delete
 var stub = map[string]string{
-	"1": "price_1REQNE2N8iX2a3y7p9hc9zsb", //fried
-	"2": "price_1RFX6L2N8iX2a3y7wpUCDJOn", //coke
+	"1": "price_1RDPOfRw6UH1Jt1bg4T8Jfw7", //fried
+	"2": "price_1RFbhxRw6UH1Jt1bkMM9c5ND", //coke
 }
 
 func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*orderpb.Item, error) {
