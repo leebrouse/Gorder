@@ -2,11 +2,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/discovery"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
+	"github.com/leebrouse/Gorder/order/infrastructure/consumer"
 	"github.com/leebrouse/Gorder/order/ports"
 	"github.com/leebrouse/Gorder/order/service"
 	"github.com/sirupsen/logrus"
@@ -45,6 +47,20 @@ func main() {
 	defer func() {
 		_ = deregisterFunc()
 	}()
+
+	//init rabbitmq
+	ch, closeCh := broker.Connect(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.password"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetString("rabbitmq.port"),
+	)
+	defer func() {
+		_ = ch.Close()
+		_ = closeCh()
+	}()
+	//consume the message form the payment service
+	go consumer.NewConsumer(application).Listen(ch)
 
 	//Run gRPC Server in goroutine
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
