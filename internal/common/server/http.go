@@ -8,6 +8,9 @@ import (
 func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
 	//using the serviceName and get its elements under the service
 	addr := viper.Sub(serviceName).GetString("http-addr")
+	if addr == "" {
+		panic("empty http address")
+	}
 	RunHTTPServerOnAddr(addr, wrapper)
 }
 
@@ -25,6 +28,6 @@ func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 
 	//run gin server
 	if err := apiRouter.Run(addr); err != nil {
-
+		panic("Http server failed to run")
 	}
 }

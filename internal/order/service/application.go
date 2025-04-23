@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/leebrouse/Gorder/common/broker"
 	grpcClient "github.com/leebrouse/Gorder/common/client"
 	"github.com/leebrouse/Gorder/common/metrics"
@@ -17,7 +18,7 @@ import (
 
 // Order application
 func NewApplication(ctx context.Context) (app.Application, func()) {
-	//init
+	//init,order server 需要调用stock server的方法需要注册grpc client
 	stockClient, closeStockClient, err := grpcClient.NewStockGRPCClient(ctx)
 	if err != nil {
 		panic(err)

@@ -2,6 +2,7 @@ package broker
 
 import (
 	"fmt"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )

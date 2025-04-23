@@ -1,12 +1,13 @@
 package adapters
 
 import (
-	domain "github.com/leebrouse/Gorder/order/domain/order"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 	"strconv"
 	"sync"
 	"time"
+
+	domain "github.com/leebrouse/Gorder/order/domain/order"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 )
 
 type MemoryOrderRepository struct {

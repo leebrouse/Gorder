@@ -2,9 +2,10 @@ package decorator
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"strings"
 )
 
 type queryLoggingDecorator[C, R any] struct {

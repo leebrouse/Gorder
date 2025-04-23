@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
@@ -12,8 +15,6 @@ import (
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/webhook"
 	"golang.org/x/net/context"
-	"io"
-	"net/http"
 )
 
 type PaymentHandler struct {

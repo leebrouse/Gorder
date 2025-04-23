@@ -2,9 +2,10 @@ package discovery
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"math/rand"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 type Registry interface {

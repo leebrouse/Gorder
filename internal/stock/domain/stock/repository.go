@@ -2,9 +2,10 @@ package stock
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"golang.org/x/net/context"
-	"strings"
 )
 
 // Stock service Repository for gRpc

@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"encoding/json"
+
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/payment/app"
@@ -38,14 +39,14 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	var forever chan struct{}
 	go func() {
 		for meg := range megs {
-			c.handleMessage(ch, q, meg)
+			c.handleMessage(q, meg)
 		}
 	}()
 	<-forever
 }
 
 // receive message function
-func (c *Consumer) handleMessage(ch *amqp.Channel, q amqp.Queue, meg amqp.Delivery) {
+func (c *Consumer) handleMessage(q amqp.Queue, meg amqp.Delivery) {
 	logrus.Infof("Payment receive the message from %s,msg=%v ", q.Name, string(meg.Body))
 
 	o := &orderpb.Order{}

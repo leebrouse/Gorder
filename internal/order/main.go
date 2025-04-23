@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/config"
@@ -15,7 +17,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"log"
 )
 
 // init order

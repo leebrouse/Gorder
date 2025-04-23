@@ -2,13 +2,14 @@ package consul
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"sync"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"strconv"
-	"strings"
-	"sync"
 )
 
 // Registry 封装了 Consul 客户端，用于服务注册与发现

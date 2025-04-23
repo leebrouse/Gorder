@@ -2,6 +2,7 @@ package ports
 
 import (
 	context "context"
+
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/leebrouse/Gorder/stock/app"
 	"github.com/leebrouse/Gorder/stock/app/query"

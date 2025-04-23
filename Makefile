@@ -12,6 +12,12 @@ genopenapi:
 	@./scripts/genopenapi.sh
 
 
-.PHONY: run air_stock air_order air_payment
+.PHONY: fmt
+fmt:
+	goimports -l -w internal/
+
+.PHONY: lint
+lint:
+	@./scripts/lint.sh
 
 

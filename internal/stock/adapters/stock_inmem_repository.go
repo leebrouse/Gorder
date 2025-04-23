@@ -2,9 +2,10 @@ package adapters
 
 import (
 	"context"
+	"sync"
+
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	domain "github.com/leebrouse/Gorder/stock/domain/stock"
-	"sync"
 )
 
 // MemoryStockRepository 是一个内存中的库存仓储，负责对库存数据进行 CRUD 操作。

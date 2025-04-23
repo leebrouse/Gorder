@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/leebrouse/Gorder/common/metrics"
 	"github.com/leebrouse/Gorder/stock/adapters"
 	"github.com/leebrouse/Gorder/stock/app"

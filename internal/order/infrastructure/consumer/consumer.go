@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"encoding/json"
+
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/order/app"
 	"github.com/leebrouse/Gorder/order/app/command"
@@ -41,14 +42,14 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	var forever chan struct{}
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(ch, q, msg)
+			c.handleMessage(msg)
 		}
 	}()
 	<-forever
 }
 
 // receive message function
-func (c *Consumer) handleMessage(ch *amqp.Channel, q amqp.Queue, msg amqp.Delivery) {
+func (c *Consumer) handleMessage(msg amqp.Delivery) {
 	logrus.Infof("receive the paid event from the rabbitmq!")
 	o := &domain.Order{}
 	if err := json.Unmarshal(msg.Body, o); err != nil {

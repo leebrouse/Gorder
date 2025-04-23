@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/order/app"
 	"github.com/leebrouse/Gorder/order/app/command"
 	"github.com/leebrouse/Gorder/order/app/query"
-	"net/http"
 )
 
 type HTTPServer struct {

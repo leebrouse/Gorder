@@ -2,8 +2,9 @@ package decorator
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 type MetricsClient interface {

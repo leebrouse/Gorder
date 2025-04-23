@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/discovery"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
@@ -12,7 +14,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"log"
 )
 
 // Viper init

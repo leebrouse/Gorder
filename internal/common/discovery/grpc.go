@@ -2,13 +2,14 @@ package discovery
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/labstack/gommon/log"
 	"github.com/leebrouse/Gorder/common/discovery/consul"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
-	"math/rand"
-	"time"
 )
 
 // RegisterToConsul 将服务注册到 Consul，并返回注销函数
@@ -71,7 +72,7 @@ func GetServiceAddr(ctx context.Context, serviceName string) (string, error) {
 		return "", err
 	}
 	if len(addrs) == 0 {
-		return "", fmt.Errorf("got empty %s addrs from consul")
+		return "", fmt.Errorf("got empty addrs from consul")
 	}
 	i := rand.Intn(len(addrs))
 	logrus.Infof("Discovered %d instance of %s,addrs=%v", len(addrs), serviceName, addrs)
