@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/leebrouse/Gorder/common/tracing"
 	"log"
 
 	"github.com/leebrouse/Gorder/common/config"
@@ -34,6 +35,14 @@ func main() {
 	//create application
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// Start jaeger for Distributed Tracing in the stock server
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer shutdown(ctx)
+
 	application := service.NewApplication(ctx)
 
 	//register service

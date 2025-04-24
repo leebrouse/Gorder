@@ -5,6 +5,7 @@
       <array>
         <option value="context" />
         <option value="errors" />
+        <option value="go.opentelemetry.io/otel/semconv/v1.4.0 as semconv" />
         <option value="log" />
       </array>
     </option>

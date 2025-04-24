@@ -1,13 +1,13 @@
 package server
 
 import (
-	"net"
-
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_tags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
+	"net"
 )
 
 // RunGRPCServer 根据服务名称启动 gRPC 服务器，并调用传入的注册函数来注册具体的服务
@@ -30,18 +30,13 @@ func RunGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) 
 
 	// 创建 gRPC 服务器，并添加一系列拦截器
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		// 配置 Unary 拦截器，用于处理单次请求
 		grpc.ChainUnaryInterceptor(
 			// 使用 grpc_tags 拦截器为请求提取字段信息
 			grpc_tags.UnaryServerInterceptor(grpc_tags.WithFieldExtractor(grpc_tags.CodeGenRequestFieldExtractor)),
 			// 使用 grpc_logrus 拦截器，将请求日志写入 logrus
 			grpc_logrus.UnaryServerInterceptor(logrusEntry),
-			// 以下拦截器被注释掉，可根据需要启用：
-			// otelgrpc.UnaryServerInterceptor(),
-			// srvMetrics.UnaryServerInterceptor(grpcprom.WithExemplarFromContext(exemplarFromContext)),
-			// logging.UnaryServerInterceptor(interceptorLogger(rpcLogger), logging.WithFieldsFromContext(logTraceID)),
-			// selector.UnaryServerInterceptor(auth.UnaryServerInterceptor(authFn), selector.MatchFunc(allButHealthZ)),
-			// recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
 		),
 		// 配置 Stream 拦截器，用于处理流式请求
 		grpc.ChainStreamInterceptor(
@@ -49,12 +44,6 @@ func RunGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) 
 			grpc_tags.StreamServerInterceptor(grpc_tags.WithFieldExtractor(grpc_tags.CodeGenRequestFieldExtractor)),
 			// 使用 grpc_logrus 拦截器，将流请求日志写入 logrus
 			grpc_logrus.StreamServerInterceptor(logrusEntry),
-			// 以下拦截器被注释掉，可根据需要启用：
-			// otelgrpc.StreamServerInterceptor(),
-			// srvMetrics.StreamServerInterceptor(grpcprom.WithExemplarFromContext(exemplarFromContext)),
-			// logging.StreamServerInterceptor(interceptorLogger(rpcLogger), logging.WithFieldsFromContext(logTraceID)),
-			// selector.StreamServerInterceptor(auth.StreamServerInterceptor(authFn), selector.MatchFunc(allButHealthZ)),
-			// recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
 		),
 	)
 	// 调用传入的注册函数，将具体的服务注册到 gRPC 服务器中

@@ -10,6 +10,7 @@ import (
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
+	"github.com/leebrouse/Gorder/common/tracing"
 	"github.com/leebrouse/Gorder/order/infrastructure/consumer"
 	"github.com/leebrouse/Gorder/order/ports"
 	"github.com/leebrouse/Gorder/order/service"
@@ -36,6 +37,13 @@ func main() {
 	//create an application with context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	//Start jaeger for Distributed Tracing in the order Server
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer shutdown(ctx)
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()

@@ -6,6 +6,7 @@ import (
 	"github.com/leebrouse/Gorder/common/config"
 	"github.com/leebrouse/Gorder/common/logging"
 	"github.com/leebrouse/Gorder/common/server"
+	"github.com/leebrouse/Gorder/common/tracing"
 	"github.com/leebrouse/Gorder/payment/infrastructure/consumer"
 	"github.com/leebrouse/Gorder/payment/service"
 	"github.com/sirupsen/logrus"
@@ -22,8 +23,16 @@ func init() {
 
 }
 func main() {
+	serviceName := viper.GetString("payment.service-name")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// Start jaeger for Distributed Tracing in the Payment server
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer shutdown(ctx)
 
 	serverType := viper.GetString("payment.server-to-run")
 
@@ -48,7 +57,7 @@ func main() {
 	paymentHandler := NewPaymentHandler(ch)
 	switch serverType {
 	case "http":
-		server.RunHTTPServer(viper.GetString("payment.service-name"), paymentHandler.RegisterRoutes)
+		server.RunHTTPServer(serviceName, paymentHandler.RegisterRoutes)
 	case "grpc":
 		logrus.Panic("unsupported type")
 	default:
