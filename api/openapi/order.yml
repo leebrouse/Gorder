@@ -73,6 +73,12 @@ components:
     # 订单对象
     Order:
       type: object
+      required:
+        - id
+        - customerID
+        - status
+        - items
+        - paymentLink
       properties:
         id:
           type: string
@@ -89,6 +95,11 @@ components:
     # 订单中的商品
     Item:
       type: object
+      required:
+        - id
+        - name
+        - quantity
+        - priceID
       properties:
         id:
           type: string
@@ -120,6 +131,9 @@ components:
             $ref: '#/components/schemas/ItemWithQuantity'  # 带数量的商品
     ItemWithQuantity:
       type: object
+      required:
+        - id
+        - quantity
       properties:
         id:
           type: string
