@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leebrouse/Gorder/common/genproto/orderpb"
+	client "github.com/leebrouse/Gorder/common/client/order"
 	"github.com/leebrouse/Gorder/order/app"
 	"github.com/leebrouse/Gorder/order/app/command"
 	"github.com/leebrouse/Gorder/order/app/query"
@@ -22,14 +22,14 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 	ctx, span := tracing.Start(c, "PostCustomerCustomerIDOrders")
 	defer span.End()
 	//create order 请求体
-	var req orderpb.CreateOrderRequest
+	var req client.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 	r, err := H.app.Commend.CreateOrder.Handle(ctx, command.CreateOrder{
 		CustomerID: req.CustomerID,
-		Items:      req.Item,
+		Items:      req.Items,
 	})
 	if err != nil {
 		c.JSON(http.StatusNoContent, gin.H{"error": err})
