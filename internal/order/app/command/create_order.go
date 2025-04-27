@@ -3,7 +3,7 @@ package command
 import (
 	"encoding/json"
 	"errors"
-
+	"fmt"
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/decorator"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
@@ -11,6 +11,7 @@ import (
 	domain "github.com/leebrouse/Gorder/order/domain/order"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 	"golang.org/x/net/context"
 )
 
@@ -38,6 +39,24 @@ type createOrderHandler struct {
 // Handle 实现了命令处理的核心逻辑
 func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*CreateOrderResult, error) {
 	// TODO: 实际应该通过gRPC调用库存服务验证商品可用性
+	//OrderCreated queue declare
+	q, err := c.channel.QueueDeclare(
+		broker.EventOrderCreated,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// a new tracer for the rabbitmq
+	t := otel.Tracer("rabbitmq")
+	ctx, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", q.Name))
+	defer span.End()
+
 	validItems, err := c.validate(ctx, cmd.Items)
 	if err != nil {
 		return nil, err
@@ -52,30 +71,19 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 		return nil, err
 	}
 
-	//OrderCreated queue declare
-	q, err := c.channel.QueueDeclare(
-		broker.EventOrderCreated,
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	// marshal the order
 	marshalledOrder, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
 
+	header := broker.InjectRabbitMQHeaders(ctx)
 	//send message
 	err = c.channel.PublishWithContext(ctx, "", q.Name, false, false, amqp.Publishing{
 		ContentType:  "application/json",
 		DeliveryMode: amqp.Persistent, //持久化消息
 		Body:         marshalledOrder,
+		Headers:      header,
 	})
 	if err != nil {
 		return nil, err

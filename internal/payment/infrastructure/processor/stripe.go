@@ -3,6 +3,7 @@ package processor
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/leebrouse/Gorder/common/tracing"
 
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/stripe/stripe-go/v82"
@@ -28,6 +29,10 @@ const (
 )
 
 func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.Order) (string, error) {
+	// global span
+	_, span := tracing.Start(ctx, "stripe_processor.create_payment_link")
+	defer span.End()
+
 	var items []*stripe.CheckoutSessionLineItemParams
 	for _, item := range order.Items {
 		items = append(items, &stripe.CheckoutSessionLineItemParams{

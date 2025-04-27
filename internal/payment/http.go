@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"go.opentelemetry.io/otel"
 	"io"
 	"net/http"
 
@@ -80,10 +82,17 @@ func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 				return
 			}
 
-			_ = h.channel.PublishWithContext(ctx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
+			//new a span for the new ctx
+			tr := otel.Tracer("rabbitmq")
+			mqCtx, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", broker.EventOrderPaid))
+			defer span.End()
+
+			header := broker.InjectRabbitMQHeaders(mqCtx)
+			_ = h.channel.PublishWithContext(mqCtx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
 				ContentType:  "application/json",
 				DeliveryMode: amqp.Persistent,
 				Body:         marshalledOrder,
+				Headers:      header,
 			})
 			logrus.Infof("message published to %s, body: %s", broker.EventOrderPaid, string(marshalledOrder))
 		}

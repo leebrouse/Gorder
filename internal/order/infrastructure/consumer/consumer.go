@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"encoding/json"
+	"fmt"
+	"go.opentelemetry.io/otel"
 
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/order/app"
@@ -42,14 +44,19 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	var forever chan struct{}
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(msg)
+			c.handleMessage(msg, q)
 		}
 	}()
 	<-forever
 }
 
 // receive message function
-func (c *Consumer) handleMessage(msg amqp.Delivery) {
+func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
+	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
+	t := otel.Tracer("rabbitmq")
+	_, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
+	defer span.End()
+
 	logrus.Infof("receive the paid event from the rabbitmq!")
 	o := &domain.Order{}
 	if err := json.Unmarshal(msg.Body, o); err != nil {
@@ -71,5 +78,7 @@ func (c *Consumer) handleMessage(msg amqp.Delivery) {
 		//TODO retry
 		return
 	}
+
+	span.AddEvent("order.update ")
 	logrus.Infof("order consume paid event success!")
 }

@@ -20,4 +20,7 @@ fmt:
 lint:
 	@./scripts/lint.sh
 
+webhook:
+	stripe listen --forward-to localhost:8285/api/webhook
+
 

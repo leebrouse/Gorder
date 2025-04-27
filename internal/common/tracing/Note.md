@@ -25,4 +25,40 @@ Trace（请求 ID: trace-id）
 
 Export（导出）→ Jaeger / Zipkin / Skywalking / OpenTelemetry Collector
 ```
+
+### Trace and Extract:
+
+---
+inject 和 extract 是 OpenTelemetry 中分布式上下文传播（context propagation）的核心机制，用于在服务之间传递 Trace 信息，从而实现完整的调用链跟踪。
+
+✅ Inject 的作用：
+将当前上下文中的 Trace 信息写入到消息或请求的载体（carrier）中，比如：
+
+HTTP 请求头（Headers）
+
+gRPC Metadata
+
+RabbitMQ headers（你代码中的场景）
+
+👉 通俗理解：
+
+把“我是谁（TraceID, SpanID, 上下文）”这张小纸条，贴到即将发送的消息上，让下一个服务知道“我是从哪里来的”。
+
+✅ Extract 的作用：
+从接收到的消息或请求中提取 Trace 信息，恢复上下文，以便继续追踪：
+
+如果消息中带有 traceparent、baggage、b3 等字段，它会把它们解析出来放进新的 context.Context 中。
+
+后续创建的新 span 就自动成为“父 Trace”下的子节点。
+
+👉 通俗理解：
+
+拿到别人贴的小纸条，知道“这个请求来自哪条链路”，然后自己继续在这张链上添一笔。
+
+🧠 一句话总结：
+Inject 是写 trace到“信封”，
+Extract 是从信封里读 trace出来。
+二者共同完成链路信息在不同服务间的无缝传递，是分布式链路追踪的关键。
+---
+
 - 链路追踪部分在"./internal/common/trace"

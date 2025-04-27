@@ -20,6 +20,10 @@ type createPaymentHandler struct {
 }
 
 func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (string, error) {
+	//new span in payment service
+	//tr := otel.Tracer("payment")
+	//ctx, _ = tr.Start(ctx, "create_payment")
+
 	//create payment link
 	link, err := c.processor.CreatePaymentLink(ctx, cmd.Order)
 	if err != nil {

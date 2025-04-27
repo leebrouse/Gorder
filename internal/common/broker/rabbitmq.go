@@ -2,6 +2,8 @@ package broker
 
 import (
 	"fmt"
+	"go.opentelemetry.io/otel"
+	"golang.org/x/net/context"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
@@ -64,4 +66,38 @@ func orderPaidExchangeDeclare(ch *amqp.Channel) error {
 		nil,
 	)
 	return err
+}
+
+type RabbitMQHeaderCarrier map[string]any
+
+// implement the TextMapCarrier interface
+func (r RabbitMQHeaderCarrier) Get(key string) string {
+	value, ok := r[key]
+	if !ok {
+		return ""
+	}
+	return value.(string)
+}
+
+func (r RabbitMQHeaderCarrier) Set(key string, value string) {
+	r[key] = value
+}
+
+func (r RabbitMQHeaderCarrier) Keys() []string {
+	keys := make([]string, len(r))
+
+	for key := range r {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func InjectRabbitMQHeaders(ctx context.Context) map[string]any {
+	carrier := make(RabbitMQHeaderCarrier)
+	otel.GetTextMapPropagator().Inject(ctx, carrier)
+	return carrier
+}
+
+func ExtractRabbitMQHeaders(ctx context.Context, headers map[string]any) context.Context {
+	return otel.GetTextMapPropagator().Extract(ctx, RabbitMQHeaderCarrier(headers))
 }

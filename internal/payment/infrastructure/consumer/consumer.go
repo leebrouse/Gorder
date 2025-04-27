@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"encoding/json"
+	"fmt"
+	"go.opentelemetry.io/otel"
 
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
@@ -48,17 +50,21 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 // receive message function
 func (c *Consumer) handleMessage(q amqp.Queue, meg amqp.Delivery) {
 	logrus.Infof("Payment receive the message from %s,msg=%v ", q.Name, string(meg.Body))
+	ctx := broker.ExtractRabbitMQHeaders(context.Background(), meg.Headers)
+	tr := otel.Tracer("payment rabbitmq")
+	_, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
+	defer span.End()
 
 	o := &orderpb.Order{}
 	if err := json.Unmarshal(meg.Body, o); err != nil {
 		logrus.Infof("failed to unmarshall msg to order,err=%v", err)
 		return
 	}
-	if _, err := c.app.Commend.CreatePayment.Handle(context.TODO(), command.CreatePayment{Order: o}); err != nil {
+	if _, err := c.app.Commend.CreatePayment.Handle(ctx, command.CreatePayment{Order: o}); err != nil {
 		//TODO: retry
 		logrus.Infof("failed to create order,err=%v", err)
 		return
 	}
-
+	span.AddEvent("payment.created")
 	logrus.Info("Consume success")
 }
