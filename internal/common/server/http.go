@@ -9,7 +9,6 @@ import (
 )
 
 func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
-	//using the serviceName and get its elements under the service
 	addr := viper.Sub(serviceName).GetString("http-addr")
 	if addr == "" {
 		panic("empty http address")
@@ -19,20 +18,17 @@ func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
 
 func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 	apiRouter := gin.New()
-	wrapper(apiRouter)
+	//在 Gin 中，中间件要在注册路由之前调用，否则不会作用于之前注册的路由。
 	setMiddlewares(apiRouter)
-	//Router 组
+	wrapper(apiRouter)
 	apiRouter.Group("/api")
-	//run gin server
 	if err := apiRouter.Run(addr); err != nil {
-		panic("Http server failed to run")
+		panic(err)
 	}
 }
 
 func setMiddlewares(r *gin.Engine) {
-	r.Use(middleware.StructuredLogger(logrus.NewEntry(logrus.StandardLogger())))
+	r.Use(middleware.StructuredLog(logrus.NewEntry(logrus.StandardLogger())))
 	r.Use(gin.Recovery())
-	// 接入 OpenTelemetry 的链路追踪功能
 	r.Use(otelgin.Middleware("default_server"))
-	//r.Use()
 }

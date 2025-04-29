@@ -20,15 +20,11 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 	if jaegerURL == "" {
 		panic("empty jaeger url")
 	}
-
 	tracer = otel.Tracer(serviceName)
-	//new exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerURL)))
 	if err != nil {
 		return nil, err
 	}
-
-	//New provider
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource.NewSchemaless(
@@ -36,7 +32,7 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 		)),
 	)
 	otel.SetTracerProvider(tp)
-	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3SingleHeader))
+	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	p := propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{}, propagation.Baggage{}, b3Propagator,
 	)

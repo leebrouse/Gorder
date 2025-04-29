@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func StructuredLogger(l *logrus.Entry) gin.HandlerFunc {
+func StructuredLog(l *logrus.Entry) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//first todo
 		logrus.Info("Request In")

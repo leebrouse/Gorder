@@ -3,7 +3,7 @@ fallback-grpc-addr: localhost:3030
 dial-grpc-timeout: 20
 
 jaeger:
-  url: "http://localhost:14268/api/traces"
+  url: "http://127.0.0.1:14268/api/traces"
 
 consul:
   addr: localhost:8500
