@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/leebrouse/Gorder/common/tracing"
+	"github.com/leebrouse/Gorder/order/convertor"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,14 +30,13 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 	}
 	r, err := H.app.Commend.CreateOrder.Handle(ctx, command.CreateOrder{
 		CustomerID: req.CustomerID,
-		Items:      req.Items,
+		Items:      convertor.NewItemWithQuantityConvertor().ClientsToEntities(req.Items),
 	})
 	if err != nil {
 		c.JSON(http.StatusNoContent, gin.H{"error": err})
 		return
 	}
-	//create traceID
-	//traceID := tracing.TraceID(ctx)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":      "success",
 		"trace":        tracing.TraceID(ctx),

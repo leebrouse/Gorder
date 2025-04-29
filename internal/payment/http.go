@@ -33,6 +33,7 @@ func (h *PaymentHandler) RegisterRoutes(c *gin.Engine) {
 
 func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 	logrus.Info("receive webhook from stripe")
+	// cope from the stripe API document
 	const MaxBodyBytes = int64(65536)
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
 	payload, err := io.ReadAll(c.Request.Body)

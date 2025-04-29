@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/decorator"
-	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/order/app/query"
+	"github.com/leebrouse/Gorder/order/convertor"
 	domain "github.com/leebrouse/Gorder/order/domain/order"
+	"github.com/leebrouse/Gorder/order/entity"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
@@ -17,8 +18,8 @@ import (
 
 // CreateOrder 定义了创建订单命令的请求结构
 type CreateOrder struct {
-	CustomerID string                      // 客户ID
-	Items      []*orderpb.ItemWithQuantity // 订单项列表（包含商品ID和数量）
+	CustomerID string                     // 客户ID
+	Items      []*entity.ItemWithQuantity // 订单项列表（包含商品ID和数量）
 }
 
 // CreateOrderResult 定义了创建订单命令的响应结构
@@ -93,17 +94,17 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 }
 
 // validate
-func (c createOrderHandler) validate(ctx context.Context, items []*orderpb.ItemWithQuantity) ([]*orderpb.Item, error) {
+func (c createOrderHandler) validate(ctx context.Context, items []*entity.ItemWithQuantity) ([]*entity.Item, error) {
 	if len(items) == 0 {
 		return nil, errors.New(" must have at least one item")
 	}
 	items = packItems(items)
-	resp, err := c.stockGRPC.CheckIfItemsInStock(ctx, items)
+	resp, err := c.stockGRPC.CheckIfItemsInStock(ctx, convertor.NewItemWithQuantityConvertor().EntitiesToProtos(items))
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.Items, nil
+	return convertor.NewItemConvertor().ProtosToEntities(resp.Items), nil
 }
 
 //合并相同id的order中的quantity 值如
@@ -121,7 +122,7 @@ func (c createOrderHandler) validate(ctx context.Context, items []*orderpb.ItemW
 		"quantity"=20
 	}
 **/
-func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
+func packItems(items []*entity.ItemWithQuantity) []*entity.ItemWithQuantity {
 	//用 map 来进行去重合并
 	merged := make(map[string]int32)
 	for _, item := range items {
@@ -129,9 +130,9 @@ func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
 	}
 
 	//合并order 之后的结果
-	var res []*orderpb.ItemWithQuantity
+	var res []*entity.ItemWithQuantity
 	for id, quantity := range merged {
-		res = append(res, &orderpb.ItemWithQuantity{ID: id, Quantity: quantity})
+		res = append(res, &entity.ItemWithQuantity{ID: id, Quantity: quantity})
 	}
 	return res
 }
