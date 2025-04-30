@@ -7,6 +7,7 @@ import (
 	client "github.com/leebrouse/Gorder/common/client/order"
 	"github.com/leebrouse/Gorder/order/app"
 	"github.com/leebrouse/Gorder/order/app/command"
+	"github.com/leebrouse/Gorder/order/app/dto"
 	"github.com/leebrouse/Gorder/order/app/query"
 	"github.com/leebrouse/Gorder/order/convertor"
 )
@@ -21,12 +22,8 @@ type HTTPServer struct {
 func (H HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerId string) {
 	var (
 		req  client.CreateOrderRequest // 请求体对象，包含客户提交的订单信息（如商品ID、数量等）
+		resp dto.CreateOrderResponse   // order response
 		err  error                     // 用于错误捕获
-		resp struct {                  // 返回响应结构体
-			CustomerID  string `json:"customer_id"`
-			OrderID     string `json:"order_id"`
-			RedirectURL string `json:"redirect_url"` // 下单成功后的跳转地址
-		}
 	)
 
 	// 在函数结束时统一处理响应输出，无论成功或失败
@@ -49,9 +46,11 @@ func (H HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerId stri
 	}
 
 	// 构造响应体
-	resp.CustomerID = req.CustomerId
-	resp.OrderID = r.OrderID
-	resp.RedirectURL = fmt.Sprintf("http://localhost:8283/success?customerID=%s&orderID=%s", req.CustomerId, r.OrderID)
+	resp = dto.NewCreateOrderResponse(
+		req.CustomerId,
+		r.OrderID,
+		fmt.Sprintf("http://localhost:8283/success?customerID=%s&orderID=%s", req.CustomerId, r.OrderID),
+	)
 }
 
 // GetCustomerCustomerIDOrdersOrdersID 查询客户订单信息的 GET 请求
