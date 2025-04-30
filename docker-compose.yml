@@ -1,6 +1,30 @@
 version: "3.9"
 
 services:
+  order:
+    image: leebrouse7/order:latest
+    container_name: order
+    ports:
+      - 8283:8283
+      - 5002:5002
+    depends_on:
+      - stock
+
+  stock:
+    image: leebrouse7/stock:latest
+    container_name: stock
+    ports:
+      - 8284:8284
+      - 5003:5003
+
+  payment:
+    image: leebrouse7/payment:latest
+    container_name: payment
+    ports:
+      - 8285:8285
+      - 5004:5004
+    depends_on:
+      - order
 
   consul:
     image: hashicorp/consul
@@ -14,6 +38,7 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+
   jaeger:
     image: "jaegertracing/all-in-one:latest"
     ports:

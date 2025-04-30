@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY orderApp ./
 
-CMD [ "./orderApp" ]
+RUN chmod +x orderApp
+CMD ["./orderApp"]
 
 

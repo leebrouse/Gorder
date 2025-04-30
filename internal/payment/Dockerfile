@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY paymentApp ./
 
-CMD [ "./paymentApp" ]
+RUN chmod +x paymentApp
+CMD ["./paymentApp"]
 
 

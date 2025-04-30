@@ -3,4 +3,5 @@ WORKDIR /app
 
 COPY stockApp ./
 
-CMD [ "./stockApp" ]
+RUN chmod +x stockApp
+CMD ["./stockApp"]
