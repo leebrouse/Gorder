@@ -2,6 +2,7 @@ package query
 
 import (
 	"github.com/leebrouse/Gorder/common/decorator"
+	"github.com/leebrouse/Gorder/common/tracing"
 	domain "github.com/leebrouse/Gorder/order/domain/order"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -25,6 +26,9 @@ type getCustomerOrderHandler struct {
 
 // Handle 实现查询处理的核心逻辑
 func (g getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOrder) (*domain.Order, error) {
+
+	_, span := tracing.Start(ctx, "get order Handler...")
+
 	// 通过仓储获取订单数据
 	// 同时验证订单是否属于指定客户（双重校验）
 	o, err := g.orderRepo.Get(ctx, query.OrderID, query.CustomerID)
@@ -32,6 +36,9 @@ func (g getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOr
 		// 错误可能包含：订单不存在/不属于该客户/数据库错误等
 		return nil, err
 	}
+
+	span.AddEvent("get order success")
+	defer span.End()
 	return o, nil
 }
 
