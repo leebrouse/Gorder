@@ -1,6 +1,6 @@
 FROM alpine:latest
 WORKDIR /app
 
-COPY orderApp ./
+COPY stockApp ./
 
-CMD [ "./orderApp" ]
+CMD [ "./stockApp" ]
