@@ -1,8 +1,4 @@
-# syntax=docker/dockerfile:1
-
-#Q: how to add common dir in to the image
-
-# step1: build the go app
+# Dockerfile for stock
 FROM golang:1.24.2-alpine AS builder
 
 WORKDIR /app
@@ -10,17 +6,16 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
-RUN go build -o stock
+# 拷贝所有代码（包括 common 和 stock）
+COPY internal ./internal
 
-# step2: copy the binary to a new image
+# 编译 stock 服务
+RUN go build -o stock ./internal/stock
+
 FROM alpine:latest
-
 WORKDIR /root/
-
 COPY --from=builder /app/stock .
 
-# 5003 grpc / 8284 http
 EXPOSE 5003 8284
-
 ENTRYPOINT ["./stock"]
+

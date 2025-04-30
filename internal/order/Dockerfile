@@ -1,22 +1,24 @@
-# step1: build the go app
-FROM golang:1.24.2-alpine AS builder
+FROM leebrouse7/common-base as common
+
+FROM golang:1.24.2-alpine as builder
 
 WORKDIR /app
-
-COPY go.mod go.sum ./
+COPY go.mod go.sum /app/order/
 RUN go mod download
 
-COPY . .
-RUN go build -o order
+COPY --from=common /app/common /app/common
+COPY . /app/order
+
+RUN go build -o order /app/order
 
 # step2: copy the binary to a new image
 FROM alpine:latest
 
-WORKDIR /root/
-
+WORKDIR /app
 COPY --from=builder /app/order .
 
-# 5002 grpc / 8283 http
+# 暴露服务端口
 EXPOSE 5002 8283
 
 ENTRYPOINT ["./order"]
+
