@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [order] # 你可以在这里添加更多的服务
+        service: [order,stock,payment] # 你可以在这里添加更多的服务
 
     steps:
       - name: Checkout code
@@ -38,4 +38,4 @@ jobs:
           context: ./internal/${{ matrix.service }} # path is base on the root so it is ./go-hello-world
           file: ./internal/${{ matrix.service }}/Dockerfile
           push: true
-          tags: ${{secrets.DOCKER_HUB_NAME }}/${{ matrix.service }}:latest
+          tags: ${{secrets.DOCKER_HUB_NAME }}/${{ matrix.service}}:latest
