@@ -14,11 +14,11 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (POST /customer/{customerID}/orders)
-	PostCustomerCustomerIDOrders(c *gin.Context, customerID string)
+	// (POST /customer/{customer_id}/orders)
+	PostCustomerCustomerIdOrders(c *gin.Context, customerId string)
 
-	// (GET /customer/{customerID}/orders/{ordersID})
-	GetCustomerCustomerIDOrdersOrdersID(c *gin.Context, customerID string, ordersID string)
+	// (GET /customer/{customer_id}/orders/{orders_id})
+	GetCustomerCustomerIdOrdersOrdersId(c *gin.Context, customerId string, ordersId string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -30,17 +30,17 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// PostCustomerCustomerIDOrders operation middleware
-func (siw *ServerInterfaceWrapper) PostCustomerCustomerIDOrders(c *gin.Context) {
+// PostCustomerCustomerIdOrders operation middleware
+func (siw *ServerInterfaceWrapper) PostCustomerCustomerIdOrders(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "customerID" -------------
-	var customerID string
+	// ------------- Path parameter "customer_id" -------------
+	var customerId string
 
-	err = runtime.BindStyledParameter("simple", false, "customerID", c.Param("customerID"), &customerID)
+	err = runtime.BindStyledParameter("simple", false, "customer_id", c.Param("customer_id"), &customerId)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter customerID: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter customer_id: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -51,29 +51,29 @@ func (siw *ServerInterfaceWrapper) PostCustomerCustomerIDOrders(c *gin.Context) 
 		}
 	}
 
-	siw.Handler.PostCustomerCustomerIDOrders(c, customerID)
+	siw.Handler.PostCustomerCustomerIdOrders(c, customerId)
 }
 
-// GetCustomerCustomerIDOrdersOrdersID operation middleware
-func (siw *ServerInterfaceWrapper) GetCustomerCustomerIDOrdersOrdersID(c *gin.Context) {
+// GetCustomerCustomerIdOrdersOrdersId operation middleware
+func (siw *ServerInterfaceWrapper) GetCustomerCustomerIdOrdersOrdersId(c *gin.Context) {
 
 	var err error
 
-	// ------------- Path parameter "customerID" -------------
-	var customerID string
+	// ------------- Path parameter "customer_id" -------------
+	var customerId string
 
-	err = runtime.BindStyledParameter("simple", false, "customerID", c.Param("customerID"), &customerID)
+	err = runtime.BindStyledParameter("simple", false, "customer_id", c.Param("customer_id"), &customerId)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter customerID: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter customer_id: %w", err), http.StatusBadRequest)
 		return
 	}
 
-	// ------------- Path parameter "ordersID" -------------
-	var ordersID string
+	// ------------- Path parameter "orders_id" -------------
+	var ordersId string
 
-	err = runtime.BindStyledParameter("simple", false, "ordersID", c.Param("ordersID"), &ordersID)
+	err = runtime.BindStyledParameter("simple", false, "orders_id", c.Param("orders_id"), &ordersId)
 	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter ordersID: %w", err), http.StatusBadRequest)
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter orders_id: %w", err), http.StatusBadRequest)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (siw *ServerInterfaceWrapper) GetCustomerCustomerIDOrdersOrdersID(c *gin.Co
 		}
 	}
 
-	siw.Handler.GetCustomerCustomerIDOrdersOrdersID(c, customerID, ordersID)
+	siw.Handler.GetCustomerCustomerIdOrdersOrdersId(c, customerId, ordersId)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -114,6 +114,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.POST(options.BaseURL+"/customer/:customerID/orders", wrapper.PostCustomerCustomerIDOrders)
-	router.GET(options.BaseURL+"/customer/:customerID/orders/:ordersID", wrapper.GetCustomerCustomerIDOrdersOrdersID)
+	router.POST(options.BaseURL+"/customer/:customer_id/orders", wrapper.PostCustomerCustomerIdOrders)
+	router.GET(options.BaseURL+"/customer/:customer_id/orders/:orders_id", wrapper.GetCustomerCustomerIdOrdersOrdersId)
 }

@@ -10,17 +10,17 @@ servers:
         default: localhost
 paths:
   # GetOrder API
-  /customer/{customerID}/orders/{ordersID}:
+  /customer/{customer_id}/orders/{orders_id}:
     get:
       description: "get order"  # API 描述
       parameters:
         - in: path
-          name: customerID
+          name: customer_id
           schema:
             type: string
           required: true  # 必填
         - in: path
-          name: ordersID
+          name: orders_id
           schema:
             type: string
           required: true  # 必填
@@ -39,12 +39,12 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # CreateOrder API
-  /customer/{customerID}/orders:
+  /customer/{customer_id}/orders:
     post:
       description: "create order"
       parameters:
         - in: path
-          name: customerID
+          name: customer_id
           schema:
             type: string
           required: true
@@ -75,14 +75,14 @@ components:
       type: object
       required:
         - id
-        - customerID
+        - customer_id
         - status
         - items
-        - paymentLink
+        - payment_link
       properties:
         id:
           type: string
-        customerID:
+        customer_id:
           type: string
         status:
           type: string
@@ -90,7 +90,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Item'  # 订单包含的商品列表
-        paymentLink:
+        payment_link:
           type: string  # 支付链接
     # 订单中的商品
     Item:
@@ -99,7 +99,7 @@ components:
         - id
         - name
         - quantity
-        - priceID
+        - price_id
       properties:
         id:
           type: string
@@ -108,7 +108,7 @@ components:
         quantity:
           type: integer
           format: int32
-        priceID:
+        price_id:
           type: string
     # 错误返回格式
     Error:
@@ -120,10 +120,10 @@ components:
     CreateOrderRequest:
       type: object
       required:
-        - customerID
+        - customer_id
         - items
       properties:
-        customerID:
+        customer_id:
           type: string
         items:
           type: array

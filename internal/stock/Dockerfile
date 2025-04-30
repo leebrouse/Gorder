@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 
+#Q: how to add common dir in to the image
+
 # step1: build the go app
 FROM golang:1.24.2-alpine AS builder
 

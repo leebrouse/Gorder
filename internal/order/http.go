@@ -18,7 +18,7 @@ type HTTPServer struct {
 }
 
 // PostCustomerCustomerIDOrders 处理客户创建订单的 POST 请求
-func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID string) {
+func (H HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerId string) {
 	var (
 		req  client.CreateOrderRequest // 请求体对象，包含客户提交的订单信息（如商品ID、数量等）
 		err  error                     // 用于错误捕获
@@ -41,7 +41,7 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 
 	// 调用业务逻辑层的 CreateOrder handler 创建订单
 	r, err := H.app.Commend.CreateOrder.Handle(c.Request.Context(), command.CreateOrder{
-		CustomerID: req.CustomerID,
+		CustomerID: req.CustomerId,
 		Items:      convertor.NewItemWithQuantityConvertor().ClientsToEntities(req.Items),
 	})
 	if err != nil {
@@ -49,13 +49,13 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 	}
 
 	// 构造响应体
-	resp.CustomerID = req.CustomerID
+	resp.CustomerID = req.CustomerId
 	resp.OrderID = r.OrderID
-	resp.RedirectURL = fmt.Sprintf("http://localhost:8283/success?customerID=%s&orderID=%s", req.CustomerID, r.OrderID)
+	resp.RedirectURL = fmt.Sprintf("http://localhost:8283/success?customerID=%s&orderID=%s", req.CustomerId, r.OrderID)
 }
 
 // GetCustomerCustomerIDOrdersOrdersID 查询客户订单信息的 GET 请求
-func (H HTTPServer) GetCustomerCustomerIDOrdersOrdersID(c *gin.Context, customerID string, ordersID string) {
+func (H HTTPServer) GetCustomerCustomerIdOrdersOrdersId(c *gin.Context, customerId string, ordersID string) {
 	var (
 		err  error       // 错误变量
 		resp interface{} // 响应数据（泛型接口，可适配不同返回类型）
@@ -69,7 +69,7 @@ func (H HTTPServer) GetCustomerCustomerIDOrdersOrdersID(c *gin.Context, customer
 	// 调用业务逻辑层查询订单信息
 	o, err := H.app.Queries.GetCustomOrder.Handle(c.Request.Context(), query.GetCustomerOrder{
 		OrderID:    ordersID,
-		CustomerID: customerID,
+		CustomerID: customerId,
 	})
 	if err != nil {
 		return
