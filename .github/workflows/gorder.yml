@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [order,stock,payment] # 你可以在这里添加更多的服务
+        service: [order] # 你可以在这里添加更多的服务
 
     steps:
       - name: Checkout code
