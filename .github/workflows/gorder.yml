@@ -36,6 +36,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./internal/${{ matrix.service }} # path is base on the root so it is ./go-hello-world
-          file: .//${{ matrix.service }}/Dockerfile
+          file: ./internal/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{secrets.DOCKER_HUB_NAME }}/${{ matrix.service }}:latest
