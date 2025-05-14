@@ -1,9 +1,9 @@
 package consumer
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"go.opentelemetry.io/otel"
 
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
@@ -11,60 +11,68 @@ import (
 	"github.com/leebrouse/Gorder/payment/app/command"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
+	"go.opentelemetry.io/otel"
 )
 
 type Consumer struct {
 	app app.Application
 }
 
-func NewConsumer(application app.Application) *Consumer {
+func NewConsumer(app app.Application) *Consumer {
 	return &Consumer{
-		app: application,
+		app: app,
 	}
 }
 
 func (c *Consumer) Listen(ch *amqp.Channel) {
-	//declare the queue
 	q, err := ch.QueueDeclare(broker.EventOrderCreated, true, false, false, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	//consume the message
-	megs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
-		logrus.Warnf("fail to consume,queue=%s,err=%v ", q.Name, err)
+		logrus.Warnf("fail to consume: queue=%s, err=%v", q.Name, err)
 	}
 
-	// loop for always reading the message
 	var forever chan struct{}
 	go func() {
-		for meg := range megs {
-			c.handleMessage(q, meg)
+		for msg := range msgs {
+			c.handleMessage(ch, msg, q)
 		}
 	}()
 	<-forever
 }
 
-// receive message function
-func (c *Consumer) handleMessage(q amqp.Queue, meg amqp.Delivery) {
-	logrus.Infof("Payment receive the message from %s,msg=%v ", q.Name, string(meg.Body))
-	ctx := broker.ExtractRabbitMQHeaders(context.Background(), meg.Headers)
-	tr := otel.Tracer("payment rabbitmq")
+func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
+	logrus.Infof("Payment receive a message from %s, msg=%v", q.Name, string(msg.Body))
+	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
+	tr := otel.Tracer("rabbitmq")
 	_, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
 	defer span.End()
 
+	var err error
+	defer func() {
+		if err != nil {
+			_ = msg.Nack(false, false)
+		} else {
+			_ = msg.Ack(false)
+		}
+	}()
+
 	o := &orderpb.Order{}
-	if err := json.Unmarshal(meg.Body, o); err != nil {
-		logrus.Infof("failed to unmarshall msg to order,err=%v", err)
+	if err := json.Unmarshal(msg.Body, o); err != nil {
+		logrus.Infof("failed to unmarshall msg to order, err=%v", err)
 		return
 	}
-	if _, err := c.app.Commend.CreatePayment.Handle(ctx, command.CreatePayment{Order: o}); err != nil {
-		//TODO: retry
-		logrus.Infof("failed to create order,err=%v", err)
+	if _, err := c.app.Commands.CreatePayment.Handle(ctx, command.CreatePayment{Order: o}); err != nil {
+		logrus.Infof("failed to create payment, err=%v", err)
+		if err = broker.HandleRetry(ctx, ch, &msg); err != nil {
+			logrus.Warnf("retry_error, error handling retry, messageID=%s, err=%v", msg.MessageId, err)
+		}
 		return
 	}
+
 	span.AddEvent("payment.created")
-	logrus.Info("Consume success")
+	logrus.Info("consume success")
 }

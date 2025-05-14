@@ -29,6 +29,8 @@ linters:
     - unparam
     - unused
 linters-settings: # please keep this alphabetized
+  #  goimports:
+  #    local-prefixes:   github.com/Nicknamezz00/gorder-pay/internal
   nakedret:
     # Align with https://github.com/alexkohler/nakedret/blob/v1.0.2/cmd/nakedret/main.go#L10
     max-func-lines: 5

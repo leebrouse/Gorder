@@ -2,10 +2,10 @@ package order
 
 import (
 	"fmt"
-	"github.com/leebrouse/Gorder/order/entity"
 
+	"github.com/leebrouse/Gorder/order/entity"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v82"
+	"github.com/stripe/stripe-go/v80"
 )
 
 type Order struct {
@@ -29,13 +29,26 @@ func NewOrder(id, customerID, status, paymentLink string, items []*entity.Item) 
 	if items == nil {
 		return nil, errors.New("empty items")
 	}
-
 	return &Order{
 		ID:          id,
 		CustomerID:  customerID,
 		Status:      status,
 		PaymentLink: paymentLink,
 		Items:       items,
+	}, nil
+}
+
+func NewPendingOrder(customerId string, items []*entity.Item) (*Order, error) {
+	if customerId == "" {
+		return nil, errors.New("empty customerID")
+	}
+	if items == nil {
+		return nil, errors.New("empty items")
+	}
+	return &Order{
+		CustomerID: customerId,
+		Status:     "pending",
+		Items:      items,
 	}, nil
 }
 

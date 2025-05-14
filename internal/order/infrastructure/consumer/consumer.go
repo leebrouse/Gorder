@@ -1,9 +1,9 @@
 package consumer
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"go.opentelemetry.io/otel"
 
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/order/app"
@@ -11,16 +11,16 @@ import (
 	domain "github.com/leebrouse/Gorder/order/domain/order"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
+	"go.opentelemetry.io/otel"
 )
 
 type Consumer struct {
 	app app.Application
 }
 
-func NewConsumer(application app.Application) *Consumer {
+func NewConsumer(app app.Application) *Consumer {
 	return &Consumer{
-		app: application,
+		app: app,
 	}
 }
 
@@ -29,44 +29,46 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
 	err = ch.QueueBind(q.Name, "", broker.EventOrderPaid, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
-	// loop for always reading the message
 	var forever chan struct{}
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(msg, q)
+			c.handleMessage(ch, msg, q)
 		}
 	}()
 	<-forever
 }
 
-// receive message function
-func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
+func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
 	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
 	t := otel.Tracer("rabbitmq")
 	_, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
 	defer span.End()
 
-	logrus.Infof("receive the paid event from the rabbitmq!")
+	var err error
+	defer func() {
+		if err != nil {
+			_ = msg.Nack(false, false)
+		} else {
+			_ = msg.Ack(false)
+		}
+	}()
+
 	o := &domain.Order{}
 	if err := json.Unmarshal(msg.Body, o); err != nil {
-		logrus.Infof("error unmarshal msg.body into domain.order, err= %v", err)
+		logrus.Infof("error unmarshal msg.body into domain.order, err = %v", err)
 		return
 	}
-
-	_, err := c.app.Commend.UpdateOrder.Handle(context.Background(), command.UpdateOrder{
+	_, err = c.app.Commands.UpdateOrder.Handle(ctx, command.UpdateOrder{
 		Order: o,
-		UpdateFn: func(c context.Context, order *domain.Order) (*domain.Order, error) {
+		UpdateFn: func(ctx context.Context, order *domain.Order) (*domain.Order, error) {
 			if err := order.IsPaid(); err != nil {
 				return nil, err
 			}
@@ -74,11 +76,13 @@ func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
 		},
 	})
 	if err != nil {
-		logrus.Infof("error updating order, orderID = %s,err=%v", o.ID, err)
-		//TODO retry
+		logrus.Infof("error updating order, orderID = %s, err = %v", o.ID, err)
+		if err = broker.HandleRetry(ctx, ch, &msg); err != nil {
+			logrus.Warnf("retry_error, error handling retry, messageID=%s, err=%v", msg.MessageId, err)
+		}
 		return
 	}
 
-	span.AddEvent("order.update ")
-	logrus.Infof("order consume paid event success!")
+	span.AddEvent("order.updated")
+	logrus.Info("order consume paid event success!")
 }

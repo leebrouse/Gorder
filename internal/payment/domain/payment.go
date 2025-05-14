@@ -1,15 +1,15 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
-	"golang.org/x/net/context"
 )
 
 type Processor interface {
-	CreatePaymentLink(ctx context.Context, order *orderpb.Order) (string, error)
+	CreatePaymentLink(context.Context, *orderpb.Order) (string, error)
 }
 
-// order entity in the payment service
 type Order struct {
 	ID          string
 	CustomerID  string

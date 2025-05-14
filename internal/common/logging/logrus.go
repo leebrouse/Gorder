@@ -7,7 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// config logrus
 func Init() {
 	SetFormatter(logrus.StandardLogger())
 	logrus.SetLevel(logrus.DebugLevel)
@@ -22,8 +21,8 @@ func SetFormatter(logger *logrus.Logger) {
 		},
 	})
 	if isLocal, _ := strconv.ParseBool(os.Getenv("LOCAL_ENV")); isLocal {
-		//logrus.SetFormatter(&prefixed.TextFormatter{
-		//	ForceFormatting: true,
+		//logger.SetFormatter(&prefixed.TextFormatter{
+		//	ForceFormatting: false,
 		//})
 	}
 }

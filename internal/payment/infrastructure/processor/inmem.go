@@ -1,8 +1,9 @@
 package processor
 
 import (
+	"context"
+
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
-	"golang.org/x/net/context"
 )
 
 type InmemProcessor struct {

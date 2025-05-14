@@ -1,11 +1,10 @@
 package discovery
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type Registry interface {
@@ -15,7 +14,6 @@ type Registry interface {
 	HealthCheck(instanceID, serviceName string) error
 }
 
-// Random generate InstanceID
 func GenerateInstanceID(serviceName string) string {
 	x := rand.New(rand.NewSource(time.Now().UnixNano())).Int()
 	return fmt.Sprintf("%s-%d", serviceName, x)

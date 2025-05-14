@@ -5,21 +5,16 @@ import (
 	"github.com/leebrouse/Gorder/order/app/query"
 )
 
-// Application
 type Application struct {
-	//	commend
-	Commend Commend
-	//	queries
-	Queries Queries
+	Commands Commands
+	Queries  Queries
 }
 
-// Commend
-type Commend struct {
+type Commands struct {
 	CreateOrder command.CreateOrderHandler
 	UpdateOrder command.UpdateOrderHandler
 }
 
-// Queries
 type Queries struct {
-	GetCustomOrder query.GetCustomerOrderHandler
+	GetCustomerOrder query.GetCustomerOrderHandler
 }

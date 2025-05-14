@@ -2,18 +2,13 @@ package app
 
 import "github.com/leebrouse/Gorder/stock/app/query"
 
-// Application
 type Application struct {
-	//	commend
-	Commend Commend
-	//	queries
-	Queries Queries
+	Commands Commands
+	Queries  Queries
 }
 
-// Commend
-type Commend struct{}
+type Commands struct{}
 
-// Queries
 type Queries struct {
 	CheckIfItemsInStock query.CheckIfItemsInStockHandler
 	GetItems            query.GetItemsHandler

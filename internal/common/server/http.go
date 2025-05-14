@@ -18,7 +18,6 @@ func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
 
 func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 	apiRouter := gin.New()
-	//在 Gin 中，中间件要在注册路由之前调用，否则不会作用于之前注册的路由。
 	setMiddlewares(apiRouter)
 	wrapper(apiRouter)
 	apiRouter.Group("/api")
@@ -30,5 +29,6 @@ func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 func setMiddlewares(r *gin.Engine) {
 	r.Use(middleware.StructuredLog(logrus.NewEntry(logrus.StandardLogger())))
 	r.Use(gin.Recovery())
+	r.Use(middleware.RequestLog(logrus.NewEntry(logrus.StandardLogger())))
 	r.Use(otelgin.Middleware("default_server"))
 }

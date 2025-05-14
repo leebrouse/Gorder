@@ -1,21 +1,20 @@
 package tracing
 
 import (
+	"context"
+
+	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
-
-	"context"
-	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var tracer = otel.Tracer("default_tracer")
 
-// Opentelemetry
 func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context) error, error) {
 	if jaegerURL == "" {
 		panic("empty jaeger url")

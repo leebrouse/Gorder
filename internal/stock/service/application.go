@@ -7,22 +7,23 @@ import (
 	"github.com/leebrouse/Gorder/stock/adapters"
 	"github.com/leebrouse/Gorder/stock/app"
 	"github.com/leebrouse/Gorder/stock/app/query"
+	"github.com/leebrouse/Gorder/stock/infrastructure/integration"
+	"github.com/leebrouse/Gorder/stock/infrastructure/persistent"
 	"github.com/sirupsen/logrus"
 )
 
-func NewApplication(ctx context.Context) app.Application {
-	//init orderRepo && stockGRPC
-	stockRepo := adapters.NewMemoryStockRepository()
-	//stockGRPC := grpc.NewStockGRPC()
-	//init logger
+func NewApplication(_ context.Context) app.Application {
+	//stockRepo := adapters.NewMemoryStockRepository()
+	db := persistent.NewMySQL()
+	stockRepo := adapters.NewMySQLStockRepository(db)
 	logger := logrus.NewEntry(logrus.StandardLogger())
-	//init metricsClient
-	metricsClient := metrics.NewTodoMetrics()
+	stripeAPI := integration.NewStripeAPI()
+	metricsClient := metrics.TodoMetrics{}
 	return app.Application{
-		Commend: app.Commend{},
+		Commands: app.Commands{},
 		Queries: app.Queries{
-			CheckIfItemsInStock: query.NewCheckIfItemsInStockHandler(stockRepo, logger, metricsClient),
-			GetItems:            query.NewGetCustomerOrderHandler(stockRepo, logger, metricsClient),
+			CheckIfItemsInStock: query.NewCheckIfItemsInStockHandler(stockRepo, stripeAPI, logger, metricsClient),
+			GetItems:            query.NewGetItemsHandler(stockRepo, logger, metricsClient),
 		},
 	}
 }

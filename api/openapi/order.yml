@@ -1,44 +1,46 @@
 openapi: 3.0.3
 info:
-  title: order service  # API 标题
-  description: order service  # API 描述
-  version: 1.0.0  # 版本号
+  title: order service
+  description: order service
+  version: 1.0.0
 servers:
-  - url: 'https://{hostname}/api'  # 服务器地址
+  - url: 'https://{hostname}/api'
     variables:
       hostname:
-        default: localhost
+        default: 127.0.0.1
+
 paths:
-  # GetOrder API
-  /customer/{customer_id}/orders/{orders_id}:
+  /customer/{customer_id}/orders/{order_id}:
     get:
-      description: "get order"  # API 描述
+      description: "get order"
       parameters:
         - in: path
           name: customer_id
           schema:
             type: string
-          required: true  # 必填
+          required: true
+
         - in: path
-          name: orders_id
+          name: order_id
           schema:
             type: string
-          required: true  # 必填
+          required: true
+
       responses:
         '200':
-          description: "get order success"
+          description: todo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/Response'
+
         default:
-          description: "error"
+          description: todo
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # CreateOrder API
   /customer/{customer_id}/orders:
     post:
       description: "create order"
@@ -48,21 +50,24 @@ paths:
           schema:
             type: string
           required: true
+
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOrderRequest'
+
       responses:
         '200':
-          description: "create order success "
+          description: todo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/Response'
+
         default:
-          description: "error"
+          description: todo
           content:
             application/json:
               schema:
@@ -70,7 +75,6 @@ paths:
 
 components:
   schemas:
-    # 订单对象
     Order:
       type: object
       required:
@@ -89,10 +93,10 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/Item'  # 订单包含的商品列表
+            $ref: '#/components/schemas/Item'
         payment_link:
-          type: string  # 支付链接
-    # 订单中的商品
+          type: string
+
     Item:
       type: object
       required:
@@ -110,13 +114,13 @@ components:
           format: int32
         price_id:
           type: string
-    # 错误返回格式
+
     Error:
       type: object
       properties:
         message:
           type: string
-    # 创建订单请求
+
     CreateOrderRequest:
       type: object
       required:
@@ -128,7 +132,8 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/ItemWithQuantity'  # 带数量的商品
+            $ref: '#/components/schemas/ItemWithQuantity'
+
     ItemWithQuantity:
       type: object
       required:
@@ -140,3 +145,21 @@ components:
         quantity:
           type: integer
           format: int32
+          minimum: 1
+
+    Response:
+      type: object
+      properties:
+        errno:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+        trace_id:
+          type: string
+      required:
+        - errno
+        - message
+        - data
+        - trace_id

@@ -1,10 +1,12 @@
 package grpc
 
 import (
+	"context"
+	"errors"
+
 	"github.com/leebrouse/Gorder/common/genproto/orderpb"
 	"github.com/leebrouse/Gorder/common/genproto/stockpb"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 )
 
 type StockGRPC struct {
@@ -15,21 +17,19 @@ func NewStockGRPC(client stockpb.StockServiceClient) *StockGRPC {
 	return &StockGRPC{client: client}
 }
 
-// implement check function
 func (s StockGRPC) CheckIfItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error) {
+	if items == nil {
+		return nil, errors.New("grpc items cannot be nil")
+	}
 	resp, err := s.client.CheckIfItemsInStock(ctx, &stockpb.CheckIfItemsInStockRequest{Items: items})
-	//log operation:
 	logrus.Info("stock_grpc response", resp)
 	return resp, err
 }
 
-// implement get function
-func (s StockGRPC) GetItems(ctx context.Context, itemsIDs []string) ([]*orderpb.Item, error) {
-	resp, err := s.client.GetItems(ctx, &stockpb.GetItemsRequest{ItemIDs: itemsIDs})
+func (s StockGRPC) GetItems(ctx context.Context, itemIDs []string) ([]*orderpb.Item, error) {
+	resp, err := s.client.GetItems(ctx, &stockpb.GetItemsRequest{ItemIDs: itemIDs})
 	if err != nil {
 		return nil, err
 	}
-	//log operation:
-	logrus.Info("stock_grpc response", resp)
-	return resp.Items, err
+	return resp.Items, nil
 }

@@ -21,7 +21,7 @@ lint:
 	@./scripts/lint.sh
 
 webhook:
-	stripe listen --forward-to localhost:8285/api/webhook
+	stripe listen --forward-to localhost:8284/api/webhook
 
 
 # Docker deploy automaticlly:
@@ -62,6 +62,3 @@ build_payment:
 	@echo "Building payment binary..."
 	cd ./internal/payment && env GOOS=linux CGO_ENABLED=0 go build -o ${PAYMENT_BINARY} .
 	@echo "Done!"
-
-
-

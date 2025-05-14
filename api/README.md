@@ -1,2 +1,2 @@
 ## api
-存放接口相关的通信协议，如：openapi、proto
+存放接口相关的通讯协议，例如openapi、proto

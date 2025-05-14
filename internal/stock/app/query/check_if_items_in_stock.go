@@ -1,61 +1,164 @@
 package query
 
 import (
+	"context"
+	"strings"
+	"time"
+
 	"github.com/leebrouse/Gorder/common/decorator"
-	"github.com/leebrouse/Gorder/common/genproto/orderpb"
+	"github.com/leebrouse/Gorder/common/handler/redis"
 	domain "github.com/leebrouse/Gorder/stock/domain/stock"
+	"github.com/leebrouse/Gorder/stock/entity"
+	"github.com/leebrouse/Gorder/stock/infrastructure/integration"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
+)
+
+const (
+	redisLockPrefix = "check_stock_"
 )
 
 type CheckIfItemsInStock struct {
-	Items []*orderpb.ItemWithQuantity
+	Items []*entity.ItemWithQuantity
 }
 
-type CheckIfItemsInStockHandler decorator.QueryHandler[CheckIfItemsInStock, []*orderpb.Item]
+type CheckIfItemsInStockHandler decorator.QueryHandler[CheckIfItemsInStock, []*entity.Item]
 
-// getItemsOrderHandler 实际的查询处理器实现
 type checkIfItemsInStockHandler struct {
-	stockRepo domain.Repository // 订单领域仓储接口
+	stockRepo domain.Repository
+	stripeAPI *integration.StripeAPI
 }
 
-// TODO: delete
+func NewCheckIfItemsInStockHandler(
+	stockRepo domain.Repository,
+	stripeAPI *integration.StripeAPI,
+	logger *logrus.Entry,
+	metricClient decorator.MetricsClient,
+) CheckIfItemsInStockHandler {
+	if stockRepo == nil {
+		panic("nil stockRepo")
+	}
+	if stripeAPI == nil {
+		panic("nil stripeAPI")
+	}
+	return decorator.ApplyQueryDecorators[CheckIfItemsInStock, []*entity.Item](
+		checkIfItemsInStockHandler{
+			stockRepo: stockRepo,
+			stripeAPI: stripeAPI,
+		},
+		logger,
+		metricClient,
+	)
+}
+
+// Deprecated
 var stub = map[string]string{
-	"1": "price_1RDPOfRw6UH1Jt1bg4T8Jfw7", //fried
-	"2": "price_1RFbhxRw6UH1Jt1bkMM9c5ND", //coke
+	"1": "price_1QBYvXRuyMJmUCSsEyQm2oP7",
+	"2": "price_1QBYl4RuyMJmUCSsWt2tgh6d",
 }
 
-func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*orderpb.Item, error) {
-	var res []*orderpb.Item
-	for _, i := range query.Items {
-		priceID, ok := stub[i.ID]
-		//默认
-		if !ok {
-			priceID = stub["1"]
+func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
+	if err := lock(ctx, getLockKey(query)); err != nil {
+		return nil, errors.Wrapf(err, "redis lock error: key=%s", getLockKey(query))
+	}
+	defer func() {
+		if err := unlock(ctx, getLockKey(query)); err != nil {
+			logrus.Warnf("redis unlock fail, err=%v", err)
 		}
-		res = append(res, &orderpb.Item{
+	}()
+
+	var res []*entity.Item
+	for _, i := range query.Items {
+		priceID, err := h.stripeAPI.GetPriceByProductID(ctx, i.ID)
+		if err != nil || priceID == "" {
+			return nil, err
+		}
+		res = append(res, &entity.Item{
 			ID:       i.ID,
 			Quantity: i.Quantity,
 			PriceID:  priceID,
 		})
 	}
+	if err := h.checkStock(ctx, query.Items); err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
-func NewCheckIfItemsInStockHandler(
-	stockRepo domain.Repository,
-	logger *logrus.Entry,
-	metricClient decorator.MetricsClient,
-) CheckIfItemsInStockHandler {
-	// 启动时依赖检查
-	if stockRepo == nil {
-		panic("nil stockRepo") // 快速失败，避免运行时空指针
+func getLockKey(query CheckIfItemsInStock) string {
+	var ids []string
+	for _, i := range query.Items {
+		ids = append(ids, i.ID)
 	}
+	return redisLockPrefix + strings.Join(ids, "_")
+}
 
-	// 应用装饰器链（通常包含日志、缓存、监控等）
-	return decorator.ApplyQueryDecorators[CheckIfItemsInStock, []*orderpb.Item](
-		checkIfItemsInStockHandler{stockRepo: stockRepo},
-		logger,
-		metricClient,
+func unlock(ctx context.Context, key string) error {
+	return redis.Del(ctx, redis.LocalClient(), key)
+}
+
+func lock(ctx context.Context, key string) error {
+	return redis.SetNX(ctx, redis.LocalClient(), key, "1", 5*time.Minute)
+}
+
+func (h checkIfItemsInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
+	var ids []string
+	for _, i := range query {
+		ids = append(ids, i.ID)
+	}
+	records, err := h.stockRepo.GetStock(ctx, ids)
+	if err != nil {
+		return err
+	}
+	idQuantityMap := make(map[string]int32)
+	for _, r := range records {
+		idQuantityMap[r.ID] += r.Quantity
+	}
+	var (
+		ok       = true
+		failedOn []struct {
+			ID   string
+			Want int32
+			Have int32
+		}
 	)
+	for _, item := range query {
+		if item.Quantity > idQuantityMap[item.ID] {
+			ok = false
+			failedOn = append(failedOn, struct {
+				ID   string
+				Want int32
+				Have int32
+			}{ID: item.ID, Want: item.Quantity, Have: idQuantityMap[item.ID]})
+		}
+	}
+	if ok {
+		return h.stockRepo.UpdateStock(ctx, query, func(
+			ctx context.Context,
+			existing []*entity.ItemWithQuantity,
+			query []*entity.ItemWithQuantity,
+		) ([]*entity.ItemWithQuantity, error) {
+			var newItems []*entity.ItemWithQuantity
+			for _, e := range existing {
+				for _, q := range query {
+					if e.ID == q.ID {
+						newItems = append(newItems, &entity.ItemWithQuantity{
+							ID:       e.ID,
+							Quantity: e.Quantity - q.Quantity,
+						})
+					}
+				}
+			}
+			return newItems, nil
+		})
+	}
+	return domain.ExceedStockError{FailedOn: failedOn}
+}
+
+func getStubPriceID(id string) string {
+	priceID, ok := stub[id]
+	if !ok {
+		priceID = stub["1"]
+	}
+	return priceID
 }

@@ -1,12 +1,10 @@
 package order
 
 import (
+	"context"
 	"fmt"
-
-	"golang.org/x/net/context"
 )
 
-// order service entity interface for grpc service
 type Repository interface {
 	Create(context.Context, *Order) (*Order, error)
 	Get(ctx context.Context, id, customerID string) (*Order, error)
