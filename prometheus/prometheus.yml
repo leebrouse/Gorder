@@ -10,4 +10,4 @@ scrape_configs:
     metrics_path: /metrics
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:9123']
+      - targets: ['host.docker.internal:9123','host.docker.internal:9124','host.docker.internal:9125']

@@ -49,6 +49,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 		logrus.Warnf("fail to consume: queue=%s, err=%v", q.Name, err)
 	}
 
+	// block the goroutine
 	var forever chan struct{}
 	go func() {
 		for msg := range msgs {
@@ -58,6 +59,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	<-forever
 }
 
+// consume the message from the payment
 func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
 	var err error
 	logrus.Infof("kitchen receive a message from %s, msg=%v", q.Name, string(msg.Body))

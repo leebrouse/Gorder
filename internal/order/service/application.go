@@ -45,14 +45,17 @@ func newApplication(_ context.Context, stockGRPC query.StockService, ch *amqp.Ch
 	mongoClient := newMongoClient()
 	orderRepo := adapters.NewOrderRepositoryMongo(mongoClient)
 	logger := logrus.NewEntry(logrus.StandardLogger())
-	metricClient := metrics.TodoMetrics{}
+	metricsClient := metrics.NewPrometheusMetricsClient(&metrics.PrometheusMetricsClientConfig{
+		Host:        viper.GetString("order.metrics_http_addr"),
+		ServiceName: viper.GetString("order.service-name"),
+	})
 	return app.Application{
 		Commands: app.Commands{
-			CreateOrder: command.NewCreateOrderHandler(orderRepo, stockGRPC, ch, logger, metricClient),
-			UpdateOrder: command.NewUpdateOrderHandler(orderRepo, logger, metricClient),
+			CreateOrder: command.NewCreateOrderHandler(orderRepo, stockGRPC, ch, logger, metricsClient),
+			UpdateOrder: command.NewUpdateOrderHandler(orderRepo, logger, metricsClient),
 		},
 		Queries: app.Queries{
-			GetCustomerOrder: query.NewGetCustomerOrderHandler(orderRepo, logger, metricClient),
+			GetCustomerOrder: query.NewGetCustomerOrderHandler(orderRepo, logger, metricsClient),
 		},
 	}
 }

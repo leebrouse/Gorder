@@ -10,18 +10,21 @@ consul:
 order:
   service-name: order
   server-to-run: http
+  metrics_http_addr: 127.0.0.1:9123
   http-addr: 127.0.0.1:8282
   grpc-addr: 127.0.0.1:5002
 
 stock:
   service-name: stock
   server-to-run: grpc
+  metrics_http_addr: 127.0.0.1:9124
   http-addr: 127.0.0.1:8283
   grpc-addr: 127.0.0.1:5003
 
 payment:
   service-name: payment
   server-to-run: http
+  metrics_http_addr: 127.0.0.1:9125
   http-addr: 127.0.0.1:8284
   grpc-addr: 127.0.0.1:5004
 

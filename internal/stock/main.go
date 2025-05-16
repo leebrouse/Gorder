@@ -46,6 +46,7 @@ func main() {
 	}()
 
 	switch serverType {
+
 	case "grpc":
 		server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 			svc := ports.NewGRPCServer(application)
