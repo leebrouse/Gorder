@@ -20,6 +20,7 @@ func NewStockGRPCClient(ctx context.Context) (client stockpb.StockServiceClient,
 	if !WaitForStockGRPCClient(viper.GetDuration("dial-grpc-timeout") * time.Second) {
 		return nil, nil, errors.New("stock grpc not available")
 	}
+
 	grpcAddr, err := discovery.GetServiceAddr(ctx, viper.GetString("stock.service-name"))
 	if err != nil {
 		return nil, func() error { return nil }, err
@@ -27,6 +28,7 @@ func NewStockGRPCClient(ctx context.Context) (client stockpb.StockServiceClient,
 	if grpcAddr == "" {
 		logrus.Warn("empty grpc addr for stock grpc")
 	}
+
 	opts := grpcDialOpts(grpcAddr)
 	conn, err := grpc.NewClient(grpcAddr, opts...)
 	if err != nil {

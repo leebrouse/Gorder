@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// config argument
 var (
 	dbName   = viper.GetString("mongo.db-name")
 	collName = viper.GetString("mongo.coll-name")

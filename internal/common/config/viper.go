@@ -19,6 +19,7 @@ func init() {
 
 var once sync.Once
 
+// using single pattern as a sharing config function
 func NewViperConfig() (err error) {
 	once.Do(func() {
 		err = newViperConfig()

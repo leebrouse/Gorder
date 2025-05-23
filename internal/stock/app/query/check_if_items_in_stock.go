@@ -133,6 +133,7 @@ func (h checkIfItemsInStockHandler) checkStock(ctx context.Context, query []*ent
 		}
 	}
 	if ok {
+		// 扣库存
 		return h.stockRepo.UpdateStock(ctx, query, func(
 			ctx context.Context,
 			existing []*entity.ItemWithQuantity,

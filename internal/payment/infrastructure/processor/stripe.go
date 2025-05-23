@@ -23,6 +23,7 @@ func NewStripeProcessor(apiKey string) *StripeProcessor {
 	return &StripeProcessor{apiKey: apiKey}
 }
 
+// redirect url when payment success
 const (
 	successURL = "http://localhost:8282/success"
 )
@@ -31,6 +32,7 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 	_, span := tracing.Start(ctx, "stripe_processor.create_payment_link")
 	defer span.End()
 
+	//call stripe to get the items from the order
 	var items []*stripe.CheckoutSessionLineItemParams
 	for _, item := range order.Items {
 		items = append(items, &stripe.CheckoutSessionLineItemParams{
@@ -47,6 +49,7 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 		"items":       string(marshalledItems),
 		"paymentLink": order.PaymentLink,
 	}
+
 	params := &stripe.CheckoutSessionParams{
 		Metadata:   metadata,
 		LineItems:  items,

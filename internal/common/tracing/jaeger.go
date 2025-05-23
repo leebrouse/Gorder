@@ -19,7 +19,9 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 	if jaegerURL == "" {
 		panic("empty jaeger url")
 	}
+	// Tracer 获取
 	tracer = otel.Tracer(serviceName)
+	// New OTel Exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerURL)))
 	if err != nil {
 		return nil, err
