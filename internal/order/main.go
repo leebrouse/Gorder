@@ -29,15 +29,18 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//introduce jaeger for the distributing link
 	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	defer shutdown(ctx)
 
+	// inject service layer (command and query)
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
 
+	// register to consul for discover the order service
 	deregisterFunc, err := discovery.RegisterToConsul(ctx, serviceName)
 	if err != nil {
 		logrus.Fatal(err)
@@ -46,6 +49,7 @@ func main() {
 		_ = deregisterFunc()
 	}()
 
+	// connect with mq
 	ch, closeCh := broker.Connect(
 		viper.GetString("rabbitmq.user"),
 		viper.GetString("rabbitmq.password"),
@@ -56,13 +60,17 @@ func main() {
 		_ = ch.Close()
 		_ = closeCh()
 	}()
+
+	// consumer in the rabbitmq
 	go consumer.NewConsumer(application).Listen(ch)
 
+	// runGRPC server in goroutine
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 		svc := ports.NewGRPCServer(application)
 		orderpb.RegisterOrderServiceServer(server, svc)
 	})
 
+	// run http server for interacting with the frontend
 	server.RunHTTPServer(serviceName, func(router *gin.Engine) {
 		router.StaticFile("/success", "../../public/success.html")
 		ports.RegisterHandlersWithOptions(router, HTTPServer{

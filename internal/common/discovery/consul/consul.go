@@ -22,7 +22,9 @@ var (
 	initErr      error
 )
 
+// New Consul
 func New(consulAddr string) (*Registry, error) {
+	// single pattern
 	once.Do(func() {
 		config := api.DefaultConfig()
 		config.Address = consulAddr
@@ -41,6 +43,7 @@ func New(consulAddr string) (*Registry, error) {
 	return consulClient, nil
 }
 
+// to registe the service
 func (r *Registry) Register(_ context.Context, instanceID, serviceName, hostPort string) error {
 	parts := strings.Split(hostPort, ":")
 	if len(parts) != 2 {
@@ -48,6 +51,7 @@ func (r *Registry) Register(_ context.Context, instanceID, serviceName, hostPort
 	}
 	host := parts[0]
 	port, _ := strconv.Atoi(parts[1])
+
 	return r.client.Agent().ServiceRegister(&api.AgentServiceRegistration{
 		ID:      instanceID,
 		Address: host,
@@ -64,6 +68,7 @@ func (r *Registry) Register(_ context.Context, instanceID, serviceName, hostPort
 }
 
 func (r *Registry) Deregister(_ context.Context, instanceID, serviceName string) error {
+	// log something
 	logrus.WithFields(logrus.Fields{
 		"instanceID":  instanceID,
 		"serviceName": serviceName,

@@ -21,6 +21,7 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 	}
 	// Tracer 获取
 	tracer = otel.Tracer(serviceName)
+
 	// New OTel Exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerURL)))
 	if err != nil {
@@ -33,18 +34,23 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 		)),
 	)
 	otel.SetTracerProvider(tp)
+
+	//
 	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	p := propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{}, propagation.Baggage{}, b3Propagator,
 	)
 	otel.SetTextMapPropagator(p)
+
 	return tp.Shutdown, nil
 }
 
+// create span for tracing the total distributed link
 func Start(ctx context.Context, name string) (context.Context, trace.Span) {
 	return tracer.Start(ctx, name)
 }
 
+// Create TraceID for research in the jaeger UI
 func TraceID(ctx context.Context) string {
 	spanCtx := trace.SpanContextFromContext(ctx)
 	return spanCtx.TraceID().String()
