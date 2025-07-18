@@ -18,7 +18,7 @@ Gorder-v2 是一个分布式微服务电商订单系统，涵盖订单、库存�
 
 ## 🏗️ 架构
 
-![Architecture](.\images\architecture.jpg)
+![Architecture](./Images/architecture.jpg)
 
 ## 🚀 快速开始
 
