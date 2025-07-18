@@ -3,6 +3,7 @@ USE gorder_v2;
 
 DROP TABLE IF EXISTS `o_stock`;
 
+# stock table
 CREATE TABLE `o_stock` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     product_id VARCHAR(255) NOT NULL,
@@ -12,5 +13,6 @@ CREATE TABLE `o_stock` (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+# test data
 INSERT INTO o_stock (product_id, quantity, version)
 VALUES ('prod_S7eivPNpH50IGP', 1000, 0), ('prod_S9vZwKRcIlaWQ0', 500, 0);

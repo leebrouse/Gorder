@@ -27,6 +27,8 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
+
+	// create Tracer factory and config options
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource.NewSchemaless(
@@ -35,7 +37,7 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(ctx context.Context
 	)
 	otel.SetTracerProvider(tp)
 
-	//
+	// set context（Propagator）
 	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	p := propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{}, propagation.Baggage{}, b3Propagator,

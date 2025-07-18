@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/leebrouse/Gorder/common/broker"
 	"github.com/leebrouse/Gorder/common/decorator"
 	"github.com/leebrouse/Gorder/order/app/query"
@@ -18,11 +17,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// request struct
 type CreateOrder struct {
 	CustomerID string
 	Items      []*entity.ItemWithQuantity
 }
 
+// response struct
 type CreateOrderResult struct {
 	OrderID string
 }
@@ -80,6 +81,9 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 	if err != nil {
 		return nil, err
 	}
+
+	// trace serve link to the mongoDB
+
 	o, err := c.orderRepo.Create(ctx, pendingOrder)
 	if err != nil {
 		return nil, err
@@ -89,6 +93,7 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 	if err != nil {
 		return nil, err
 	}
+	// inject ctx into the mq message
 	header := broker.InjectRabbitMQHeaders(ctx)
 	err = c.channel.PublishWithContext(ctx, "", q.Name, false, false, amqp.Publishing{
 		ContentType:  "application/json",
@@ -115,6 +120,7 @@ func (c createOrderHandler) validate(ctx context.Context, items []*entity.ItemWi
 	return convertor.NewItemConvertor().ProtosToEntities(resp.Items), nil
 }
 
+// merge the order with same item.ID
 func packItems(items []*entity.ItemWithQuantity) []*entity.ItemWithQuantity {
 	merged := make(map[string]int32)
 	for _, item := range items {

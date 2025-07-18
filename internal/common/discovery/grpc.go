@@ -25,6 +25,7 @@ func RegisterToConsul(ctx context.Context, serviceName string) (func() error, er
 	if err := discoverer.reg.Register(ctx, instanceID, serviceName, grpcAddr); err != nil {
 		return func() error { return nil }, err
 	}
+	//
 	go func() {
 		for {
 			if err := discoverer.reg.HealthCheck(instanceID, serviceName); err != nil {

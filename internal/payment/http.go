@@ -86,6 +86,7 @@ func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 				return
 			}
 
+			// payment server to push message to the order and kitchen server
 			tr := otel.Tracer("rabbitmq")
 			mqCtx, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", broker.EventOrderPaid))
 			defer span.End()

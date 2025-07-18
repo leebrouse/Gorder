@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"context"
+	"github.com/leebrouse/Gorder/common/tracing"
 	"time"
 
 	_ "github.com/leebrouse/Gorder/common/config"
@@ -42,7 +43,12 @@ type orderModel struct {
 }
 
 func (r *OrderRepositoryMongo) Create(ctx context.Context, order *domain.Order) (created *domain.Order, err error) {
+	_, span := tracing.Start(ctx, "Create order into the mongoDB")
+	defer span.End()
+	// log
 	defer r.logWithTag("create", err, order, created)
+
+	// Create operation
 	write := r.marshalToModel(order)
 	res, err := r.collection().InsertOne(ctx, write)
 	if err != nil {
@@ -69,6 +75,10 @@ func (r *OrderRepositoryMongo) logWithTag(tag string, err error, input *domain.O
 }
 
 func (r *OrderRepositoryMongo) Get(ctx context.Context, id, customerID string) (got *domain.Order, err error) {
+	_, span := tracing.Start(ctx, "Get order from the mongoDB")
+	defer span.End()
+
+	// log
 	defer r.logWithTag("get", err, nil, got)
 	read := &orderModel{}
 	mongoID, _ := primitive.ObjectIDFromHex(id)
@@ -124,11 +134,11 @@ func (r *OrderRepositoryMongo) Update(
 	mongoID, _ := primitive.ObjectIDFromHex(oldOrder.ID)
 	res, err := r.collection().UpdateOne(
 		ctx,
-		bson.M{"_id": mongoID, "customer_id": oldOrder.CustomerID},
+		bson.M{"_id": mongoID, "customer_id": oldOrder.CustomerID}, //filter
 		bson.M{"$set": bson.M{
 			"status":       updated.Status,
 			"payment_link": updated.PaymentLink,
-		}},
+		}}, // update
 	)
 	if err != nil {
 		return

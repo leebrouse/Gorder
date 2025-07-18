@@ -22,6 +22,7 @@ var (
 	maxRetryCount = viper.GetInt64("rabbitmq.max-retry")
 )
 
+// connect rabbitmq
 func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 	address := fmt.Sprintf("amqp://%s:%s@%s:%s", user, password, host, port)
 	conn, err := amqp.Dial(address)
@@ -32,10 +33,12 @@ func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	// order -> payment
 	err = ch.ExchangeDeclare(EventOrderCreated, "direct", true, false, false, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	// payment -> order and kitchen
 	err = ch.ExchangeDeclare(EventOrderPaid, "fanout", true, false, false, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
@@ -46,6 +49,7 @@ func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 	return ch, conn.Close
 }
 
+// create dead queue
 func createDLX(ch *amqp.Channel) error {
 	q, err := ch.QueueDeclare("share_queue", true, false, false, false, nil)
 	if err != nil {
@@ -63,6 +67,7 @@ func createDLX(ch *amqp.Channel) error {
 	return err
 }
 
+// try to retry message
 func HandleRetry(ctx context.Context, ch *amqp.Channel, d *amqp.Delivery) error {
 	logrus.Info("handleretry_max-retry-count", maxRetryCount)
 	if d.Headers == nil {
@@ -75,6 +80,7 @@ func HandleRetry(ctx context.Context, ch *amqp.Channel, d *amqp.Delivery) error 
 	retryCount++
 	d.Headers[amqpRetryHeaderKey] = retryCount
 
+	// retry to send message
 	if retryCount >= maxRetryCount {
 		logrus.Infof("moving message %s to dlq", d.MessageId)
 		return ch.PublishWithContext(ctx, "", DLQ, false, false, amqp.Publishing{
@@ -94,6 +100,7 @@ func HandleRetry(ctx context.Context, ch *amqp.Channel, d *amqp.Delivery) error 
 	})
 }
 
+// for impeletement TextMapCarrier interface to trace rabbitmq link in the opentelemetry
 type RabbitMQHeaderCarrier map[string]interface{}
 
 func (r RabbitMQHeaderCarrier) Get(key string) string {
@@ -118,12 +125,14 @@ func (r RabbitMQHeaderCarrier) Keys() []string {
 	return keys
 }
 
+// inject ctx into rabbitmq header
 func InjectRabbitMQHeaders(ctx context.Context) map[string]interface{} {
 	carrier := make(RabbitMQHeaderCarrier)
 	otel.GetTextMapPropagator().Inject(ctx, carrier)
 	return carrier
 }
 
+// extract ctx from the rabbitmq header
 func ExtractRabbitMQHeaders(ctx context.Context, headers map[string]interface{}) context.Context {
 	return otel.GetTextMapPropagator().Extract(ctx, RabbitMQHeaderCarrier(headers))
 }

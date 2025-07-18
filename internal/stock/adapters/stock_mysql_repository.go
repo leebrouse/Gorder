@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"context"
-
 	"github.com/leebrouse/Gorder/stock/entity"
 	"github.com/leebrouse/Gorder/stock/infrastructure/persistent"
 	"github.com/leebrouse/Gorder/stock/infrastructure/persistent/builder"
@@ -25,6 +24,10 @@ func (m MySQLStockRepository) GetItems(ctx context.Context, ids []string) ([]*en
 }
 
 func (m MySQLStockRepository) GetStock(ctx context.Context, ids []string) ([]*entity.ItemWithQuantity, error) {
+	// test
+	//_, span := tracing.Start(ctx, "GetStock from the mysql")
+	//defer span.End()
+
 	query := builder.NewStock().ProductIDs(ids...)
 	data, err := m.db.BatchGetStockByID(ctx, query)
 	if err != nil {

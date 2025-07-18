@@ -9,8 +9,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// lock
 func SetNX(ctx context.Context, client *redis.Client, key, value string, ttl time.Duration) (err error) {
 	now := time.Now()
+	// log
 	defer func() {
 		l := logrus.WithContext(ctx).WithFields(logrus.Fields{
 			"start": now,
@@ -32,6 +34,7 @@ func SetNX(ctx context.Context, client *redis.Client, key, value string, ttl tim
 	return err
 }
 
+// unlock
 func Del(ctx context.Context, client *redis.Client, key string) (err error) {
 	now := time.Now()
 	defer func() {

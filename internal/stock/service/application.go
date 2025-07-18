@@ -16,6 +16,7 @@ import (
 func NewApplication(_ context.Context) app.Application {
 	//stockRepo := adapters.NewMemoryStockRepository()
 	db := persistent.NewMySQL()
+	// 开闭原则
 	stockRepo := adapters.NewMySQLStockRepository(db)
 	logger := logrus.NewEntry(logrus.StandardLogger())
 	stripeAPI := integration.NewStripeAPI()

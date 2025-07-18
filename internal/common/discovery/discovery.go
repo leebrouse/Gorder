@@ -29,6 +29,7 @@ func NewServiceDiscoverer() *ServiceDiscoverer {
 	return &ServiceDiscoverer{reg: registry}
 }
 
+// helper function to generate instanceID in the consul
 func GenerateInstanceID(serviceName string) string {
 	x := rand.New(rand.NewSource(time.Now().UnixNano())).Int()
 	return fmt.Sprintf("%s-%d", serviceName, x)
