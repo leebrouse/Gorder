@@ -18,7 +18,7 @@ Gorder-v2 is a distributed microservices e-commerce order system, covering core 
 
 ## 🏗️ Architecture
 
-![Architecture](.\images\architecture.jpg)
+![Architecture](./images/architecture.jpg)
 
 ## 🚀 Quick Start
 
