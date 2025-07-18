@@ -6,7 +6,7 @@
 
 # Gorder
 
-Gorder-v2 is a distributed microservices e-commerce order system, covering core modules such as order, stock, payment, and kitchen. It supports high concurrency, observability, service discovery, message queue, and other modern cloud-native features. Suitable for both learning and production.
+Gorder is a distributed microservices e-commerce order system, covering core modules such as order, stock, payment, and kitchen. It supports high concurrency, observability, service discovery, message queue, and other modern cloud-native features. Suitable for both learning and production.
 
 ## ✨ Features
 
